@@ -1,3 +1,4 @@
+export * from "./api/IPv8API";
 export * from "./api/types";
 export { IPv8Observer } from "./events/IPv8Observer";
 export * from "./IPv8Service";
