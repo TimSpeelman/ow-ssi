@@ -1,4 +1,4 @@
-import { VerifieeService } from "../../ipv8/services/VerifieeService";
+import { IVerifieeService } from "../../ipv8/services/types/IVerifieeService";
 import { OWVerifyRequestValidator } from "./syntax-validation";
 import { OWVerifyRequest } from "./types";
 
@@ -7,7 +7,7 @@ import { OWVerifyRequest } from "./types";
  */
 export class OWVerifiee {
 
-    constructor(private ipv8Verifiee: VerifieeService, ) { }
+    constructor(private ipv8Verifiee: IVerifieeService) { }
 
     validateRequest(request: OWVerifyRequest): string[] {
         const error = OWVerifyRequestValidator(request);

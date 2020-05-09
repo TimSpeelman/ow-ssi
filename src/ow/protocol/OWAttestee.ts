@@ -1,5 +1,4 @@
-import { AttesteeService } from "../../ipv8/services/AttesteeService";
-import { AttestationSpec } from "../../ipv8/services/types/IAttesteeService";
+import { AttestationSpec, IAttesteeService } from "../../ipv8/services/types/IAttesteeService";
 import { OWAttestOfferValidator } from "./syntax-validation";
 import { AttestedAttr, OWAttestOffer } from "./types";
 
@@ -8,7 +7,7 @@ import { AttestedAttr, OWAttestOffer } from "./types";
  */
 export class OWAttestee {
 
-    constructor(protected ipv8Attestee: AttesteeService) { }
+    constructor(protected ipv8Attestee: IAttesteeService) { }
 
     validateOffer(offer: OWAttestOffer): string[] {
         const error = OWAttestOfferValidator(offer);

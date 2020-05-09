@@ -1,5 +1,5 @@
 import { AttributeWithHash } from "../../ipv8/services/types/Attribute";
-import { VerifierService } from "../../ipv8/services/VerifierService";
+import { IVerifierService } from "../../ipv8/services/types/IVerifierService";
 import { OWVerifyResponseValidator } from "./syntax-validation";
 import { OWVerifyRequest, OWVerifyResponse } from "./types";
 
@@ -8,7 +8,7 @@ import { OWVerifyRequest, OWVerifyResponse } from "./types";
  */
 export class OWVerifier {
 
-    constructor(private ipv8Verifier: VerifierService) { }
+    constructor(private ipv8Verifier: IVerifierService) { }
 
     // TODO: apply constraints
     validateResponse(req: OWVerifyRequest, resp: OWVerifyResponse): string[] {

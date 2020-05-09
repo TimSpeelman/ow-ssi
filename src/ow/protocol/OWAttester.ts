@@ -1,6 +1,6 @@
 
-import { AttesterService } from "../../ipv8/services/AttesterService";
 import { Attribute } from "../../ipv8/services/types/Attribute";
+import { IAttesterService } from "../../ipv8/services/types/IAttesterService";
 import { OWAttestOffer } from "./types";
 
 /**
@@ -8,7 +8,7 @@ import { OWAttestOffer } from "./types";
  */
 export class OWAttester {
 
-    constructor(protected ipv8Attester: AttesterService) { }
+    constructor(protected ipv8Attester: IAttesterService) { }
 
     public async attestByOffer(offer: OWAttestOffer) {
         const attrs = offer.attributes.map((a): Attribute => ({
