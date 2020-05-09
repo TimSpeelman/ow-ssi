@@ -1,8 +1,8 @@
 import { IPv8Service } from "../../../src/ipv8/IPv8Service";
 import { OWAttestee } from "../../../src/ow/protocol/OWAttestee";
 import { OWVerifiee } from "../../../src/ow/protocol/OWVerifiee";
-import { RecipeClient } from "../../../src/recipe/server/RecipeClient";
-import { RecipeConfiguration, RecipeServer } from "../../../src/recipe/server/RecipeServer";
+import { RecipeClient } from "../../../src/recipe/RecipeClient";
+import { RecipeConfiguration, RecipeServer } from "../../../src/recipe/RecipeServer";
 import { RecipeRequest } from "../../../src/recipe/types";
 import { loadTemporaryIPv8Configuration } from "../../../src/util/ipv8conf";
 import { describe, expect, it } from "../../tools";
