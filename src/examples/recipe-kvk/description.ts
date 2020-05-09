@@ -1,11 +1,12 @@
-import { ServerDescriptor } from "../../recipe/server/IAttestationServerRESTAPI";
+import { RecipeServiceDescriptor } from "../../recipe/types";
 import { mapValues } from "../../util/mapValues";
 import { kvkServerPeer } from "./config";
-import { KVKProcedures } from "./procedures";
+import { KVKRecipes } from "./recipes";
 
-export const KVKDescription: ServerDescriptor = {
+export const KVKDescription: RecipeServiceDescriptor = {
     id: "kvk",
     url: `http://localhost:${kvkServerPeer.rest_port}`,
+    recipe_url: `http://localhost:${kvkServerPeer.rest_port}/recipe`,
     logo_url: "https://statisch.ondernemersplein.kvk.nl/includes/downloads/KVK_logo_blauw_tcm106-423787.svg",
     mid_b64: kvkServerPeer.mid_b64,
     title: {
@@ -17,5 +18,5 @@ export const KVKDescription: ServerDescriptor = {
             + " zijn gericht op het registreren, informeren en adviseren van ondernemers."
     },
     website: "https://www.kvk.nl",
-    procedures: mapValues(KVKProcedures, (e) => e.desc),
+    recipes: mapValues(KVKRecipes, (e) => e.recipe),
 };

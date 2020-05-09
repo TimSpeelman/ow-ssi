@@ -1,7 +1,7 @@
-import { OWAttestee } from "../../ow/protocol/OWAttestee";
-import { OWVerifiee } from "../../ow/protocol/OWVerifiee";
-import { OWAttestOffer, OWVerifyResponse } from "../../ow/protocol/types";
-import { Recipe, RecipeRequest } from "../types";
+import { OWAttestee } from "../ow/protocol/OWAttestee";
+import { OWVerifiee } from "../ow/protocol/OWVerifiee";
+import { OWAttestOffer, OWVerifyResponse } from "../ow/protocol/types";
+import { Recipe, RecipeRequest } from "./types";
 
 
 type Connection = {

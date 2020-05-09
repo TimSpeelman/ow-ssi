@@ -1,11 +1,11 @@
+import { RecipeConfiguration } from "../../recipe/RecipeServer";
 import { Dict } from "../../types/Dict";
-import { ProcedureConfig } from "../../types/types";
 import { bsnResolver } from "./resolvers/bsn";
 import { passportResolver } from "./resolvers/passport";
 
-export const BRPProcedures: Dict<ProcedureConfig> = {
+export const BRPRecipes: Dict<RecipeConfiguration> = {
     p_passport_nl: {
-        desc: {
+        recipe: {
             title: {
                 nl_NL: "Nederlands Paspoort",
             },
@@ -28,14 +28,13 @@ export const BRPProcedures: Dict<ProcedureConfig> = {
                     nl_NL: "Burgerservicenummer"
                 },
             }],
-            procedure_name: "p_passport_nl",
-            requirements: [],
+            name: "p_passport_nl",
         },
         resolver: passportResolver,
     },
 
     p_bsn: {
-        desc: {
+        recipe: {
             title: {
                 nl_NL: "Burgerservicenummer",
             },
@@ -46,8 +45,7 @@ export const BRPProcedures: Dict<ProcedureConfig> = {
                     nl_NL: "Burgerservicenummer"
                 },
             }],
-            procedure_name: "p_bsn",
-            requirements: [],
+            name: "p_bsn",
         },
         resolver: bsnResolver,
     },

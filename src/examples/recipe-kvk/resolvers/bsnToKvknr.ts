@@ -1,4 +1,6 @@
-import { AttributeResolver, Credential } from '../../../types/types';
+import { OWVerifyResponse } from "../../../ow/protocol/types";
+import { RecipeResolver } from "../../../recipe/RecipeServer";
+import { Credential } from '../../../types/types';
 import { Database } from '../../../util/Database';
 
 const db = new Database({
@@ -8,7 +10,12 @@ const db = new Database({
 const BSN_ATTR_NAME = 'bsn'
 const KVKNR_ATTR_NAME = 'kvknr'
 
-export const bsnToKvknrResolver: AttributeResolver = (credentials: Credential[]) => {
+export const bsnToKvknrResolver: RecipeResolver = (vResp: OWVerifyResponse) => {
+    const credentials: Credential[] = vResp.attributes.map(a => ({
+        attribute_hash: a.hash,
+        attribute_name: a.ref, // fixme
+        attribute_value: a.value,
+    }))
     const bsn = credentials.find(c => c.attribute_name === BSN_ATTR_NAME)
     if (!bsn) {
         throw new Error('Cannot resolve without BSN')

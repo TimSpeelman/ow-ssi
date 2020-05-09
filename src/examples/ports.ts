@@ -11,5 +11,5 @@ export const ports = {
     freeformAttestServer: 8100,
     recipeBRPServer: 9100,
     recipeKVKServer: 9101,
-    recipeRandServer: 9200,
+    recipeRandServer: 9103,
 };

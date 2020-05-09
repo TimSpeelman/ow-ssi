@@ -1,11 +1,12 @@
-import { ServerDescriptor } from "../../recipe/server/IAttestationServerRESTAPI";
+import { RecipeServiceDescriptor } from "../../recipe/types";
 import { mapValues } from "../../util/mapValues";
 import { brpServerPeer } from "./config";
-import { BRPProcedures } from "./procedures";
+import { BRPRecipes } from "./recipes";
 
-export const BRPDescription: ServerDescriptor = {
+export const BRPDescription: RecipeServiceDescriptor = {
     id: "brp",
     url: `http://localhost:${brpServerPeer.rest_port}`,
+    recipe_url: `http://localhost:${brpServerPeer.rest_port}/recipe`,
     logo_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Logo_rijksoverheid_met_beeldmerk.svg/1200px-Logo_rijksoverheid_met_beeldmerk.svg.png",
     mid_b64: brpServerPeer.mid_b64,
     title: {
@@ -17,5 +18,5 @@ export const BRPDescription: ServerDescriptor = {
             + " hebben verlaten (niet ingezetenen)."
     },
     website: "https://www.rijksoverheid.nl/onderwerpen/privacy-en-persoonsgegevens/basisregistratie-personen-brp",
-    procedures: mapValues(BRPProcedures, (e) => e.desc),
+    recipes: mapValues(BRPRecipes, (e) => e.recipe),
 };

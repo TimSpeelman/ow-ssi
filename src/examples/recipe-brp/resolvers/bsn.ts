@@ -1,6 +1,6 @@
-import { AttributeResolver } from '../../../types/types';
+import { RecipeResolver } from "../../../recipe/RecipeServer";
 
-export const bsnResolver: AttributeResolver = () =>
+export const bsnResolver: RecipeResolver = () =>
     Promise.resolve([
         {
             attribute_name: 'bsn',

@@ -1,6 +1,6 @@
 import { IPv8Service } from "../../ipv8/IPv8Service";
-import { HttpRecipeServer } from "../../recipe/server/HttpRecipeServer";
-import { RecipeServer } from "../../recipe/server/RecipeServer";
+import { HttpRecipeServer } from "../../recipe/HttpRecipeServer";
+import { RecipeServer } from "../../recipe/RecipeServer";
 import { randServerPeer } from './config';
 import { RandDescription } from "./description";
 import { RandRecipes } from "./recipes";

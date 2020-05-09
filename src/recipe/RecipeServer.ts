@@ -1,10 +1,10 @@
-import { IPv8Service } from "../../ipv8/IPv8Service";
-import { Attribute } from "../../ipv8/services/types/Attribute";
-import { OWAttester } from "../../ow/protocol/OWAttester";
-import { OWVerifier } from "../../ow/protocol/OWVerifier";
-import { OWAttestOffer, OWVerifyRequest, OWVerifyResponse } from "../../ow/protocol/types";
-import { Dict } from "../../types/Dict";
-import { Recipe, RecipeRequest } from "../types";
+import { IPv8Service } from "../ipv8/IPv8Service";
+import { Attribute } from "../ipv8/services/types/Attribute";
+import { OWAttester } from "../ow/protocol/OWAttester";
+import { OWVerifier } from "../ow/protocol/OWVerifier";
+import { OWAttestOffer, OWVerifyRequest, OWVerifyResponse } from "../ow/protocol/types";
+import { Dict } from "../types/Dict";
+import { Recipe, RecipeRequest } from "./types";
 
 export type RecipeResolver = (response?: OWVerifyResponse) => Promise<Attribute[]>;
 

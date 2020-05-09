@@ -1,7 +1,9 @@
-import { AttestationServer } from '../../recipe/server/AttestationServer';
+import { IPv8Service } from "../../ipv8/IPv8Service";
+import { HttpRecipeServer } from "../../recipe/HttpRecipeServer";
+import { RecipeServer } from "../../recipe/RecipeServer";
 import { kvkServerPeer } from './config';
 import { KVKDescription } from "./description";
-import { KVKProcedures } from './procedures';
+import { KVKRecipes } from "./recipes";
 
 const options = {
     ipv8_url: kvkServerPeer.ipv8_url,
@@ -9,6 +11,13 @@ const options = {
     mid_b64: kvkServerPeer.mid_b64,
 }
 
-const server = new AttestationServer(KVKProcedures, KVKDescription, options)
+const ipv8 = new IPv8Service(options.ipv8_url);
+ipv8.start();
 
-server.start()
+const recipeServer = new RecipeServer(options.mid_b64, ipv8, KVKRecipes);
+
+const httpServer = new HttpRecipeServer(KVKDescription, options.http_port, recipeServer);
+
+httpServer.start()
+
+console.log(`Recipe Service "KVK" running at http://localhost:${options.http_port}/about`)

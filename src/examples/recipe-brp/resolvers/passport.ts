@@ -1,6 +1,6 @@
-import { AttributeResolver } from '../../../types/types';
+import { RecipeResolver } from "../../../recipe/RecipeServer";
 
-export const passportResolver: AttributeResolver = () =>
+export const passportResolver: RecipeResolver = () =>
     Promise.resolve([
         {
             attribute_name: "firstname",

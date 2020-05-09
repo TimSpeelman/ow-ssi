@@ -1,9 +1,12 @@
 import bodyParser from "body-parser";
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
-import { RecipeRequest, RecipeServiceDescriptor } from "../types";
+import { Validate } from "../util/validate";
 import { RecipeServer } from "./RecipeServer";
-import { Validation } from "./Validation";
+import { RecipeRequestValidator } from "./syntax-validation";
+import { RecipeRequest, RecipeServiceDescriptor } from "./types";
+
+const { many, atKey } = Validate
 
 export class HttpRecipeServer {
 
@@ -42,7 +45,10 @@ export class HttpRecipeServer {
 
         // Validate HTTP Request
         const data = req.body;
-        const error = Validation.postRecipe(data);
+        const validator = many([
+            atKey('request', RecipeRequestValidator)
+        ]);
+        const error = validator(data);
         if (error !== false) {
             return this.sendInvalidRequest(res, `Validation Error: ${error}`);
         }

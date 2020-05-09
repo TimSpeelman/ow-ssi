@@ -5,7 +5,7 @@ import { Dict } from '../../types/Dict';
 import { ClientProcedure, ProviderDesc } from '../../types/types';
 import { mapValues } from '../../util/mapValues';
 import { kvkServerPeer } from '../recipe-kvk/config';
-import { KVKProcedures } from '../recipe-kvk/procedures';
+import { KVKRecipes } from '../recipe-kvk/recipes';
 import { clientPeer } from './config';
 
 const providers: Dict<ProviderDesc> = {
@@ -14,7 +14,7 @@ const providers: Dict<ProviderDesc> = {
             http_address: `http://localhost:${kvkServerPeer.rest_port}`,
             mid_b64: kvkServerPeer.mid_b64
         },
-        procedures: mapValues(KVKProcedures, p => p.desc)
+        procedures: mapValues(KVKRecipes, p => p.desc)
     }
 }
 
