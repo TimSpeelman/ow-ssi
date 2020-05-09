@@ -5,7 +5,7 @@ import { ResolutionResult } from "./resolution/types";
 
 export class OWVerifyRequestHandler {
 
-    private consentCallback: ConsentCallback; // TODO : can also disambiguate
+    private consentCallback: VerifyConsentCallback; // TODO : can also disambiguate
 
     /** Allowed references */
     private allowedRefs: string[] = [];
@@ -17,7 +17,7 @@ export class OWVerifyRequestHandler {
 
     }
 
-    setConsentCallback(callback: ConsentCallback) {
+    setConsentCallback(callback: VerifyConsentCallback) {
         this.consentCallback = callback;
     }
 
@@ -50,4 +50,4 @@ export class OWVerifyRequestHandler {
 
 }
 
-export type ConsentCallback = (res: ResolutionResult) => Promise<boolean>
+export type VerifyConsentCallback = (res: ResolutionResult) => Promise<boolean>
