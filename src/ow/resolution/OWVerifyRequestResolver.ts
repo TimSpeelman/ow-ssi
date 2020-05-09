@@ -1,5 +1,5 @@
 import { OWVerifyReqAttr, OWVerifyRequest, OWVerifyRespAttr, OWVerifyResponse } from "../protocol/types";
-import { IAttributeStore, ResolutionAttributeResult, ResolutionResult } from "./types";
+import { IAttributeStore, IVerifyRequestResolver, ResolutionAttributeResult, ResolutionResult } from "./types";
 
 /**
  * This Resolver consumes a VerifyRequest and fetches matching attribute
@@ -12,7 +12,7 @@ import { IAttributeStore, ResolutionAttributeResult, ResolutionResult } from "./
  * The ResolutionResult specifies whether the result was successful, and if
  * so includes a proper OWVerifyResponse.
  */
-export class OWVerifyRequestResolver {
+export class OWVerifyRequestResolver implements IVerifyRequestResolver {
     constructor(
         private myId: string,
         private repo: IAttributeStore,

@@ -1,4 +1,6 @@
 import { Attribute } from "../../../src/ipv8/services/types/Attribute";
+import { OWVerifyRequestResolver } from "../../../src/ow/resolution/OWVerifyRequestResolver";
+import { IVerifyRequestResolver } from "../../../src/ow/resolution/types";
 import { AttestationClient } from "../../../src/recipe/client/AttestationClient";
 import { AttestationClientFactory } from "../../../src/recipe/client/AttestationClientFactory";
 import { AttestationServer } from "../../../src/recipe/server/AttestationServer";
@@ -6,6 +8,7 @@ import { Dict } from "../../../src/types/Dict";
 import { ClientProcedure, ProcedureConfig } from "../../../src/types/types";
 import { loadTemporaryIPv8Configuration } from "../../../src/util/ipv8conf";
 import { mapValues } from "../../../src/util/mapValues";
+import { mockRepo } from "../../ow/mockRepo";
 import { describe, expect, it } from "../../tools";
 
 
@@ -22,20 +25,8 @@ export const clientPeer = {
     mid_b64: clientConf.mid_b64,
 }
 
-
-// const CNT = 50;
-// const size = Math.pow(10, 10);
-// const arr = []
-// for (let i = 0; i < CNT; i++) {
-//     arr.push(`${Math.floor(Math.random() * size)}`);
-// }
-
-// console.log("Testing values");
-// console.log(arr);
-
 const ATT_ZERO = "att0";
 const ATT_ZERO_VAL = "2168897456";
-// const ATT_ZERO_VAL = "3598846111";
 const ATT_ONE = "att1";
 const ATT_ONE_VAL = "att1val";
 
@@ -91,7 +82,13 @@ describe("Client-Server Attestation including credential verification", function
     it("attests if verification succeeds", async function () {
         server = mockAttestationServer();
         await server.start();
-        client = mockAttestationClient();
+
+        const repo = mockRepo([
+
+        ])
+        const resolver = new OWVerifyRequestResolver(clientPeer.mid_b64, repo)
+
+        client = mockAttestationClient(resolver);
         const myAttrs = {};
 
         await setupAttestationZero(client, server, myAttrs);
@@ -113,37 +110,12 @@ describe("Client-Server Attestation including credential verification", function
         console.log(attestations[0]);
     });
 
-    // it("verifies multiple times", async function () {
-    //     server = mockAttestationServer();
-    //     server.start();
-    //     client = mockAttestationClient();
-    //     const myAttrs = {};
-
-
-    //     const procedure: ClientProcedure = {
-    //         server: serverId,
-    //         desc: config.procedureOne,
-    //     };
-
-    //     let fails = 0;
-
-    //     for (let x = 0; x < CNT; x++) {
-    //         await setupAttestationZero(client, server, myAttrs);
-    //         try {
-    //             await executeProcedureFromClient(client, procedure, myAttrs);
-    //         } catch (e) {
-    //             fails++;
-    //         }
-    //     }
-
-    //     console.log("Number of fails", fails);
-    // });
-
 });
 
-function mockAttestationClient() {
+
+function mockAttestationClient(resolver: IVerifyRequestResolver) {
     const { ipv8_url, mid_b64 } = clientPeer;
-    const factory = new AttestationClientFactory({ ipv8_url, mid_b64 });
+    const factory = new AttestationClientFactory({ ipv8_url, mid_b64 }, resolver);
     return factory.create();
 }
 
@@ -152,7 +124,7 @@ function executeProcedureFromClient(
     procedure: ClientProcedure,
     clientAttributeStore: Dict<any>
 ) {
-    return attClient.execute(procedure, clientAttributeStore)
+    return attClient.execute(procedure)
         .then(({ data, attestations }) => {
             data.forEach((attr: Attribute) => {
                 // @ts-ignore

@@ -11,19 +11,19 @@ export const BRPProcedures: Dict<ProcedureConfig> = {
             },
             attributes: [{
                 name: "firstname",
-                type: "id_metadata",
+                format: "id_metadata",
                 title: {
                     nl_NL: "Voornaam"
                 },
             }, {
                 name: "lastname",
-                type: "id_metadata",
+                format: "id_metadata",
                 title: {
                     nl_NL: "Achternaam"
                 },
             }, {
                 name: "bsn",
-                type: "id_metadata",
+                format: "id_metadata",
                 title: {
                     nl_NL: "Burgerservicenummer"
                 },
@@ -41,7 +41,7 @@ export const BRPProcedures: Dict<ProcedureConfig> = {
             },
             attributes: [{
                 name: "bsn",
-                type: "id_metadata",
+                format: "id_metadata",
                 title: {
                     nl_NL: "Burgerservicenummer"
                 },

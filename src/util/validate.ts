@@ -29,7 +29,7 @@ const V = {
 
     atKey: (key: string, validate: Validator) => (d: any) => {
         const error = validate(d[key])
-        return error ? `At key ${key}: ${error}` : false
+        return error ? `At key '${key}': ${error}` : false
     }
 }
 

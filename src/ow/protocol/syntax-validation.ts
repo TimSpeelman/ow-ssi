@@ -18,7 +18,7 @@ export const OWVerifyReqAttrValidator = many([
 export const OWVerifyRequestValidator = many([
     object,
     atKey("verifier_id", string),
-    atKey("ref", string),
+    atKey("ref", optional(string)),
     atKey("attributes", arrayWithEach(OWVerifyReqAttrValidator)),
     atKey("subject_id", optional(string)),
     atKey("reason", optional(string)),
@@ -52,7 +52,7 @@ export const OWAttestOfferAttrValidator = many([
 export const OWAttestOfferValidator = many([
     object,
     atKey("attester_id", string),
-    atKey("ref", string),
+    atKey("ref", optional(string)),
     atKey("subject_id", optional(string)),
     atKey("attributes", arrayWithEach(OWAttestOfferAttrValidator)),
     atKey("expiresAtTimeInMillis", number),

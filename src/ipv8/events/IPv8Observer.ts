@@ -29,6 +29,10 @@ export class IPv8Observer {
         this.verifPoller = new AsyncListPoller(() => this.api.listVerificationOutputs().catch(this.handleOffline));
     }
 
+    get isRunning() {
+        return this.active;
+    }
+
     public start() {
         console.log("Observer starting");
         const ms = this.pollIntervalInMillis;

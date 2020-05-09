@@ -28,6 +28,9 @@ export class IPv8API {
 
     /** Make sure we look for a particular peer */
     public connectPeer(mid_b64: string): Promise<Peer[]> {
+        if (!mid_b64 || mid_b64.length === 0) {
+            throw new Error("Not a valid mid");
+        }
         return axios
             .get(this.ipv8_api_url + `/dht/peers/${b64ToHex(mid_b64)}`)
             .then((response: any) => response.data.peers)

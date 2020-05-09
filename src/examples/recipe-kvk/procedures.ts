@@ -10,7 +10,7 @@ export const KVKProcedures: Dict<ProcedureConfig> = {
             },
             attributes: [{
                 name: "kvknr",
-                type: "id_metadata",
+                format: "id_metadata",
                 title: {
                     nl_NL: "KVK Nummer"
                 },

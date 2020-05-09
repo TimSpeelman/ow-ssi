@@ -65,6 +65,7 @@ for i in indices:
     # Print the peer for reference
     print("Starting peer " + name, i)
     print("port", (14410 + i))
+    print("url", "http://localhost:" + str(14410 + i))
     print("mid_b64", b64encode(ipv8.keys["anonymous id"].mid))
 
     data = {

@@ -1,6 +1,6 @@
 export interface OWVerifyRequest {
     verifier_id: string;
-    ref: string;
+    ref?: string;
     attributes: OWVerifyReqAttr[];
     subject_id?: string;
     reason?: string;
@@ -36,7 +36,7 @@ export interface OWVerifyRespAttr {
 
 export interface OWAttestOffer {
     attester_id: string;
-    ref: string;
+    ref?: string;
     subject_id?: string;
     attributes: OWAttestOfferAttr[];
     expiresAtTimeInMillis: number;

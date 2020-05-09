@@ -18,7 +18,7 @@ export class PeerService {
     }
 
     /** Finds a peer by Member ID, or rejects after a timeout */
-    findPeer(peerId: string, timeoutInMillis = 2000): Promise<boolean> {
+    findPeer(peerId: string, timeoutInMillis = 10000): Promise<boolean> {
         if (!this.observer.isRunning) {
             throw new Error("IPv8 observer is not running.");
         }
@@ -30,6 +30,7 @@ export class PeerService {
                 resolve(true);
 
             } else { // Otherwise, try finding it.
+                console.log("Trying to find peer", peerId)
                 let timer;
 
                 // Once the peer is found, clear the timer and resolve.

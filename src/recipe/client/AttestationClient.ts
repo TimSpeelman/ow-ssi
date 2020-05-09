@@ -1,15 +1,15 @@
 import axios from 'axios';
 import { IPv8API } from '../../ipv8/api/IPv8API';
-import { Attestation } from "../../ipv8/api/types";
 import { Attribute } from '../../ipv8/services/types/Attribute';
-import { AttestationSpec, IAttesteeService } from "../../ipv8/services/types/IAttesteeService";
+import { IAttesteeService } from "../../ipv8/services/types/IAttesteeService";
 import { IVerifieeService } from '../../ipv8/services/types/IVerifieeService';
-import { OWAttestOffer } from "../../ow/protocol/types";
+import { OWAttestee } from "../../ow/protocol/OWAttestee";
+import { OWVerifiee } from "../../ow/protocol/OWVerifiee";
+import { AttestedAttr, OWAttestOffer, OWVerifyRequest, OWVerifyResponse } from "../../ow/protocol/types";
+import { IVerifyRequestResolver } from "../../ow/resolution/types";
 import { ServerDescriptor } from "../../recipe/server/IAttestationServerRESTAPI";
-import { Dict } from '../../types/Dict';
-import { ClientProcedure, Credential, PeerId } from '../../types/types';
+import { ClientProcedure, PeerId } from '../../types/types';
 import { arrayContentsEqual } from "../../util/mapEqual";
-import { strlist } from '../../util/strlist';
 import { Validate } from '../../util/validate';
 import { HttpAPIGateway } from './HttpAPIGateway';
 
@@ -23,6 +23,7 @@ export class AttestationClient {
         private api: IPv8API,
         public verifieeService: IVerifieeService,
         public attesteeService: IAttesteeService,
+        public resolver: IVerifyRequestResolver,
         private logger: (...args: any[]) => any = console.log
     ) { }
 
@@ -43,71 +44,55 @@ export class AttestationClient {
      */
     public async execute(
         procedure: ClientProcedure,
-        credential_values: Dict<string>,
-        userConsentOnData: (data: Attribute[]) => Promise<boolean> = null,
+        userConsentOnData: (offer: OWAttestOffer) => Promise<boolean> = null,
         onStatusChange: (status: Status) => any = () => { },
     ): Promise<OWResponse> {
         const { desc, server } = procedure
         try {
             this.log(`Start executing procedure ${procedure.desc.procedure_name}.`);
-            this.grantVerificationOfCredentials(server.mid_b64, desc.requirements); // Todo OWVerifiee
+
+            // Simulate VerifyRequest (TODO clean up)
+            const vReq: OWVerifyRequest = {
+                attributes: desc.requirements.map(a => ({
+                    name: a,
+                    format: "id_metadata", // FIXME,
+                    ref: a,
+                })),
+                ref: "FIXME",
+                verifier_id: server.mid_b64,
+            }
+
+            const verifiee = new OWVerifiee(this.verifieeService);
+            const validUntil = Date.now() + 10000; // FIXME
+
+            verifiee.allowVerification(vReq, validUntil);
 
             // TODO Replace with Resolve VReq
             onStatusChange(Status.FETCHING_LOCAL_CREDENTIALS);
-            const credentials = await this.fetchLocalCredentials(desc.requirements, credential_values)
+
+            const resolve = await this.resolver.resolveRequest(vReq);
+            if (resolve.status !== "success") {
+                throw new Error("OWAttest failed. Could not resolve verification request.");
+            }
 
             onStatusChange(Status.FETCHING_DATA);
-            const data = await this.fetchDataAtProvider(procedure, credentials) // Will receive AttestOffer
+            const offer = await this.fetchDataAtProvider(procedure, resolve.response) // Will receive AttestOffer
 
             // Abort if user does not consent with provided data
-            if (userConsentOnData && !await userConsentOnData(data)) {
+            if (userConsentOnData && !await userConsentOnData(offer)) {
                 return null;
             }
 
             onStatusChange(Status.REQUESTING_ATTESTATION);
-            const attestations = await this.requestAndAwaitAttestations(procedure) // Attest by Offer
+
+            const attestee = new OWAttestee(this.attesteeService);
+            const attributes = await attestee.requestAttestationByOffer(offer);
 
             onStatusChange(Status.COMPLETE);
-            return { data, attestations }
+            return { attributes }
         } catch (err) {
             throw new Error(`OWAttest failed. Status: ${err.errno}. Message: ${err.message}`);
         }
-    }
-
-    /** Fetch the hashes from the client's IPv8 belonging to specific attributes. */
-    protected async fetchLocalCredentials(
-        credential_names: string[],
-        values: Dict<string>
-    ): Promise<Credential[]> {
-        if (credential_names.length === 0) {
-            return [];
-        }
-        this.log(`Fetching credential hashes of ${strlist(credential_names)}...`)
-        const promises = credential_names.map(async cName => {
-            const attribute_hash = await this.fetchCredentialHashOrThrow(cName)
-            this.log(`Received hash for ${cName}: ${attribute_hash}.`)
-            return {
-                attribute_name: cName,
-                attribute_hash,
-                attribute_value: values[cName],
-            }
-        })
-        const result = await Promise.all(promises)
-        this.log(`Received all credential hashes.`)
-        return result;
-    }
-
-    /** 
-     * Check that we have an attestation for a given attribute.
-     * @throws If an attribute hash is missing.
-     */
-    protected async fetchCredentialHashOrThrow(attribute_name: string): Promise<string> {
-        const attestations = await this.api.listAttestations()
-        const attestation = attestations.find(a => a.attribute_name === attribute_name)
-        if (!attestation) {
-            throw new Error(`Missing hash for attribute ${attribute_name}.`)
-        }
-        return attestation.attribute_hash
     }
 
     /**
@@ -116,36 +101,19 @@ export class AttestationClient {
      */
     protected async fetchDataAtProvider(
         procedure: ClientProcedure,
-        credentials: Credential[]
-    ): Promise<Attribute[]> {
+        verifyResponse: OWVerifyResponse,
+    ): Promise<OWAttestOffer> {
         const procedure_name = procedure.desc.procedure_name;
         const request = {
             procedure_id: procedure_name,
             mid_b64: this.me.mid_b64,
-            credentials
+            verify_response: verifyResponse,
         }
         this.log(`Requesting data for procedure ${procedure_name} at provider...`);
         const response = await new HttpAPIGateway(axios, procedure.server.http_address).procedure(request);
         const data = this.validateReceivedDataOrThrow(procedure, response.offer);
         this.log(`Received data.`, data);
-        return data;
-    }
-
-    /**
-     * Allow incoming verification requests from the Provider for the given attributes.
-     */
-    async grantVerificationOfCredentials(mid_b64: string, attributeNames: string[]) {
-        if (attributeNames.length === 0) {
-            return [];
-        }
-        this.log(`Staged verification for '${mid_b64}' of attributes ${strlist(attributeNames)}.`);
-        const verificationValidUntil = Date.now() + this.config.allowVerificationTimeoutMillis
-        await this.verifieeService.stageVerification(
-            mid_b64,
-            attributeNames,
-            verificationValidUntil
-        )
-        this.log(`Verification complete.`);
+        return response.offer;
     }
 
     /**
@@ -153,12 +121,13 @@ export class AttestationClient {
      */
     protected validateReceivedDataOrThrow(procedure: ClientProcedure, receivedData: OWAttestOffer): Attribute[] { // TODO: Move to Attestee
         const { arrayWithEach, many, hasKey } = Validate
-        // FIXME Validate OWAttestOffer
-        // const validator = arrayWithEach(many([hasKey('attribute_name'), hasKey('attribute_value')]))
-        // const error = validator(receivedData)
-        // if (error !== false) {
-        // throw new Error(`Server response malformed: ${error}.`);
-        // }
+
+        const attestee = new OWAttestee(this.attesteeService);
+        const errors = attestee.validateOffer(receivedData);
+        if (errors.length > 0) {
+            throw new Error(`Server response malformed: ${errors[0]}`);
+        }
+
         const array: Attribute[] = receivedData.attributes.map(a => ({
             attribute_name: a.name,
             attribute_value: a.value
@@ -171,16 +140,6 @@ export class AttestationClient {
         return array;
     }
 
-    protected async requestAndAwaitAttestations(procedure: ClientProcedure): Promise<Attestation[]> {
-        const attrs: AttestationSpec[] = procedure.desc.attributes.map(a =>
-            ({ attribute_name: a.name, id_format: a.type }))
-
-        this.log("Requesting all attestations..")
-        const result = await this.attesteeService.requestAttestation(procedure.server.mid_b64, attrs);
-        this.log("Received all attestations.");
-        return result;
-    }
-
     protected log(...args: any[]) {
         if (this.logger) {
             this.logger('[AttestationClient]', ...args)
@@ -189,8 +148,7 @@ export class AttestationClient {
 }
 
 export interface OWResponse {
-    data: Attribute[]
-    attestations: Attestation[]
+    attributes: AttestedAttr[]
 }
 
 export enum Status {

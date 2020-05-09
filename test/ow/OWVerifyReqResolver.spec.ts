@@ -1,6 +1,6 @@
 
-import { OWVerifyRequestResolver } from "../../src/ow/OWVerifyRequestResolver";
-import { OWVerifyRequest } from "../../src/ow/types";
+import { OWVerifyRequest } from "../../src/ow/protocol/types";
+import { OWVerifyRequestResolver } from "../../src/ow/resolution/OWVerifyRequestResolver";
 import { describe, expect, it } from "../tools";
 import { mockRepo } from "./mockRepo";
 
@@ -70,6 +70,7 @@ describe("OWVerifyReqResolver", () => {
 
     it("shows multiple options", async function () {
         const vReq: OWVerifyRequest = {
+            verifier_id: "",
             ref: "abc",
             attributes: [
                 { ref: "x", name: "a1", format: "id_metadata", include_value: true },

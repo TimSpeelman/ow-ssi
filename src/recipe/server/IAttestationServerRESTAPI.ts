@@ -1,6 +1,6 @@
-import { OWAttestOffer } from "../../ow/protocol/types";
+import { OWAttestOffer, OWVerifyResponse } from "../../ow/protocol/types";
 import { Dict } from "../../types/Dict";
-import { Credential, ProcedureDescription } from '../../types/types';
+import { ProcedureDescription } from '../../types/types';
 
 /** The API endpoint paths */
 export const paths: { [k in keyof IAttestationServerRESTAPI]: string } = {
@@ -31,5 +31,6 @@ export interface ServerDescriptor {
 export interface ReqProcedure {
     procedure_id: string
     mid_b64: string
-    credentials: Credential[]
+    // credentials: Credential[]
+    verify_response: OWVerifyResponse
 }

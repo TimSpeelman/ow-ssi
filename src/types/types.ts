@@ -6,13 +6,6 @@ export interface ServerId {
     mid_b64: string;
 }
 
-export interface AttProcedure {
-    procedure_name: string;
-    attribute_name: string;
-    credential_name: string;
-    server: ServerId;
-}
-
 export interface PeerId {
     mid_b64: string;
 }
@@ -33,7 +26,7 @@ export interface ProcedureDescription {
 export interface AttributeDescription {
     name: string;
     title: Dict<string>;
-    type: string;
+    format: string;
 }
 
 export interface ProcedureConfig {

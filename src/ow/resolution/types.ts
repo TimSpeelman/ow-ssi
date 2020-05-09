@@ -1,4 +1,4 @@
-import { AttestedAttr, OWVerifyReqAttr, OWVerifyRespAttr, OWVerifyResponse } from "../protocol/types";
+import { AttestedAttr, OWVerifyReqAttr, OWVerifyRequest, OWVerifyRespAttr, OWVerifyResponse } from "../protocol/types";
 
 export interface IAttributeStore {
     all(): Promise<AttestedAttr[]>
@@ -16,4 +16,8 @@ export interface ResolutionAttributeResult {
     request: OWVerifyReqAttr;
     responses: OWVerifyRespAttr[];
     results: AttestedAttr[];
+}
+
+export interface IVerifyRequestResolver {
+    resolveRequest(request: OWVerifyRequest): Promise<ResolutionResult>
 }
