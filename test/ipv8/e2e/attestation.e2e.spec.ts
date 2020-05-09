@@ -2,9 +2,8 @@ import fs from "fs";
 import { IPv8Service } from "../../../src/ipv8/IPv8Service";
 import { describe, expect, it } from "../../tools";
 
-const aliceConf = JSON.parse(fs.readFileSync('temp/server-kvk/config.json', { encoding: 'utf8' }))
-// const bobConf = JSON.parse(fs.readFileSync('temp/server-brp/config.json', { encoding: 'utf8' }))
-const chrisConf = JSON.parse(fs.readFileSync('temp/client/config.json', { encoding: 'utf8' }))
+const aliceConf = JSON.parse(fs.readFileSync('temp/test-alice/config.json', { encoding: 'utf8' }))
+const chrisConf = JSON.parse(fs.readFileSync('temp/test-bob/config.json', { encoding: 'utf8' }))
 
 const config = {
     aliceUrl: `http://localhost:${aliceConf.port}`,
@@ -25,7 +24,7 @@ describe("IPv8Service e2e Attestation", () => {
         // Chris grants attestation to Alice
         chris.attesterService.stageAttestation(
             config.aliceMid,
-            { attribute_name: "attr1", attribute_value: "val1" },
+            [{ attribute_name: "attr1", attribute_value: "val1" }],
             Date.now() + 10000)
 
         // Alice requests attestation by Chris
