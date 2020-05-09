@@ -20,7 +20,7 @@ export class RecipeClient {
         protected connection: Connection,
     ) { }
 
-    async requestRecipe(recipe: Recipe, vResp?: OWVerifyResponse) {
+    async requestRecipe(recipe: Recipe, vResp?: OWVerifyResponse): Promise<OWAttestOffer> {
         const request = this.makeRecipeRequest(recipe, vResp);
 
         if (recipe.verify_request) {
@@ -36,9 +36,7 @@ export class RecipeClient {
             throw new Error("Illegal server offer: " + errors[0]);
         }
 
-        const attributes = await this.attestee.requestAttestationByOffer(offer);
-
-        return attributes;
+        return offer;
     }
 
     validateOffer(recipe: Recipe, offer: OWAttestOffer): string[] {
