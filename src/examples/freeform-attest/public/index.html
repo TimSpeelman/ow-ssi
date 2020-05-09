@@ -1,0 +1,181 @@
+<html>
+
+<head>
+    <title>Freeform Attestation Example - Open Wallet</title>
+</head>
+
+<body>
+    <h1>Freeform Attestation Example - Open Wallet</h1>
+    <p>Welcome. I will attest to anything. Enter any attributes here that you wish to offer. Generate a QR and scan it
+        with your Wallet. The attributes will be attested to.</p>
+
+    <h2>Step 1: Create some attributes</h2>
+    <p>Create some attributes that you wish to attest to.</p>
+    <form id="attrform" action="#">
+        <table>
+            <thead>
+                <tr>
+                    <th>Attribute Name</th>
+                    <th>Attribute Value</th>
+                </tr>
+            </thead>
+            <tbody id="rows">
+                <tr>
+                    <td><input name="name" class="name-input" /></td>
+                    <td><input name="value" /></td>
+                </tr>
+            </tbody>
+        </table>
+        <button type="button" onclick="addRow()">Add Attribute</button>
+        <button type="submit">Generate QR</button>
+    </form>
+
+    <h2>Step 2: Scan the QR Code</h2>
+    <p>Scan the QR code below with your Wallet. It will prompt you to share the "name" attribute, if you have it.</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Attribute Name</th>
+                <th>Attribute Value</th>
+            </tr>
+        </thead>
+        <tbody id="outputrows">
+        </tbody>
+    </table>
+
+    <p>
+        <div id="qr">Create a new QR in step 1.</div>
+    </p>
+    <button onclick="mockScan()">Scan with Dummy Wallet</button>
+
+    <script>
+        function last(arr) { return arr[arr.length - 1] }
+
+        function addRow() {
+            const row = document.createElement("tr");
+            row.innerHTML = `<td><input name='name' class="name-input" /></td><td><input name='value' /></td>`
+            document.getElementById("rows").appendChild(row);
+            last(document.getElementsByClassName("name-input")).focus();
+        }
+        function addOutRow(name, value) {
+            const row = document.createElement("tr");
+            row.innerHTML = `<td>${name}</td><td>${value}</td>`
+            document.getElementById("outputrows").appendChild(row);
+        }
+
+        function submitForm(e) {
+            e.returnValue = false;
+            e.preventDefault();
+            document.getElementById("outputrows").innerHTML = "";
+
+            const d = new FormData(document.forms["attrform"]);
+            const names = d.getAll("name");
+            const values = d.getAll("value");
+            const attributes = [];
+            for (let i in names) {
+                if (names[i]) {
+                    attributes.push({
+                        attribute_name: names[i],
+                        attribute_value: values[i],
+                    })
+                    addOutRow(names[i], values[i]);
+                }
+            }
+
+            createVerifyIntent(attributes).then((result) => {
+                document.getElementById("qr").innerHTML = result.qr;
+            })
+
+            document.getElementById("rows").innerHTML = "";
+            addRow();
+
+            return false;
+        }
+
+        const authServer = "http://localhost:8100";
+        const dummyWallet = "http://localhost:5000";
+
+        let qrString;
+
+        function createVerifyIntent(attributes) {
+            return new Promise(function (resolve) {
+                const xhr = new XMLHttpRequest();
+                xhr.open("POST", authServer + "/createAttestOffer");
+                xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+                xhr.onload = function () {
+                    const resp = xhr.response;
+                    const data = JSON.parse(resp);
+                    qrString = JSON.stringify(data.data);
+                    resolve(data);
+                }
+                xhr.send(JSON.stringify({ attributes }));
+            })
+        }
+
+        // function awaitVerifyStatus(uuid) {
+        //     const pollIntervalInMillis = 500;
+        //     return new Promise(function (resolve) {
+        //         let done = false;
+
+        //         let interval = setInterval(function () {
+
+        //             if (done) {
+        //                 clearInterval(interval);
+        //                 return;
+        //             }
+
+        //             const xhr = new XMLHttpRequest();
+        //             xhr.open("GET", authServer + "/result?uuid=" + uuid);
+        //             xhr.onload = function () {
+        //                 const resp = xhr.response;
+        //                 const data = JSON.parse(resp);
+        //                 if (data.result) {
+        //                     done = true;
+        //                     resolve(data.result);
+        //                 }
+        //             }
+        //             xhr.send();
+
+        //         }, pollIntervalInMillis)
+        //     })
+        // }
+
+        // const qrs = {};
+
+        // createVerifyIntent("name").then(function (data) {
+        //     document.getElementById("qr-name").innerHTML = data.qr;
+        //     qrs["name"] = JSON.stringify(data.data);
+
+        //     awaitVerifyStatus(data.data.uuid).then((result) => {
+        //         document.getElementById("qr-name").innerHTML = "Hello, " + result.response.attributes[0].value;
+        //     })
+        // })
+
+        // createVerifyIntent("age").then(function (data) {
+        //     document.getElementById("qr-age").innerHTML = data.qr;
+        //     qrs["age"] = JSON.stringify(data.data);
+
+        //     awaitVerifyStatus(data.data.uuid).then((result) => {
+        //         document.getElementById("qr-age").innerHTML = "You are " + result.response.attributes[0].value + " years old.";
+        //     })
+        // })
+
+
+        function mockScan() {
+            return new Promise(function (resolve) {
+                const xhr = new XMLHttpRequest();
+                xhr.open("GET", dummyWallet + "/scan?qr=" + qrString);
+                xhr.onload = function () {
+                    console.log("Mock scan returns", xhr.response)
+                }
+                xhr.send();
+            })
+        }
+
+        document.getElementById("attrform").addEventListener("submit", submitForm);
+
+    </script>
+</body>
+
+</html>

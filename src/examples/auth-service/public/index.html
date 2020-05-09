@@ -1,0 +1,115 @@
+<html>
+
+<head>
+    <title>Auth Service Example - Open Wallet</title>
+</head>
+
+<body>
+    <h1>Auth Service Example - Open Wallet</h1>
+    <p>Welcome. This example web page shows how the Open Wallet Auth Service can be used to quickly integrate
+        Self-Sovereign Identity into existing (web) applications.</p>
+
+    <p>By scanning the QR code with your Wallet, the Wallet starts communicating with the Auth Service. The Auth Service
+        sends an OW:VerifyRequest. If your Wallet has the requested data and you give your consent, the verification
+        protocol will execute. You should see your data appear in this window.</p>
+
+    <h2>Example 1: Reveal your Name</h2>
+    Scan the QR code below with your Wallet. It will prompt you to share the "name" attribute, if you have it.
+
+    <p>
+        <div id="qr-name">Loading QR.. If I do not appear, the Auth Service is down.</div>
+    </p>
+    <small>Alternatively, use the 'dummy' Wallet:</small>
+    <button onclick="mockScan('name')">Scan with Dummy Wallet</button>
+
+    <h2>Example 2: Reveal your Age</h2>
+    Scan the QR code below with your Wallet. It will prompt you to share the "name" attribute, if you have it.
+
+    <p>
+        <div id="qr-age">Loading QR.. If I do not appear, the Auth Service is down.</div>
+    </p>
+    <small>Alternatively, use the 'dummy' Wallet:</small>
+    <button onclick="mockScan('age')">Scan with Dummy Wallet</button>
+
+    <script>
+        const authServer = "http://localhost:8000";
+        const dummyWallet = "http://localhost:5000";
+
+        function createVerifyIntent(template) {
+            return new Promise(function (resolve) {
+                const xhr = new XMLHttpRequest();
+                xhr.open("GET", authServer + "/referToVerifyRequest?template=" + template);
+                xhr.onload = function () {
+                    const resp = xhr.response;
+                    const data = JSON.parse(resp);
+                    resolve(data);
+                }
+                xhr.send();
+            })
+        }
+
+        function awaitVerifyStatus(uuid) {
+            const pollIntervalInMillis = 500;
+            return new Promise(function (resolve) {
+                let done = false;
+
+                let interval = setInterval(function () {
+
+                    if (done) {
+                        clearInterval(interval);
+                        return;
+                    }
+
+                    const xhr = new XMLHttpRequest();
+                    xhr.open("GET", authServer + "/result?uuid=" + uuid);
+                    xhr.onload = function () {
+                        const resp = xhr.response;
+                        const data = JSON.parse(resp);
+                        if (data.result) {
+                            done = true;
+                            resolve(data.result);
+                        }
+                    }
+                    xhr.send();
+
+                }, pollIntervalInMillis)
+            })
+        }
+
+        const qrs = {};
+
+        createVerifyIntent("name").then(function (data) {
+            document.getElementById("qr-name").innerHTML = data.qr;
+            qrs["name"] = JSON.stringify(data.data);
+
+            awaitVerifyStatus(data.data.uuid).then((result) => {
+                document.getElementById("qr-name").innerHTML = "Hello, " + result.response.attributes[0].value;
+            })
+        })
+
+        createVerifyIntent("age").then(function (data) {
+            document.getElementById("qr-age").innerHTML = data.qr;
+            qrs["age"] = JSON.stringify(data.data);
+
+            awaitVerifyStatus(data.data.uuid).then((result) => {
+                document.getElementById("qr-age").innerHTML = "You are " + result.response.attributes[0].value + " years old.";
+            })
+        })
+
+
+        function mockScan(variant) {
+            const qrString = qrs[variant];
+            return new Promise(function (resolve) {
+                const xhr = new XMLHttpRequest();
+                xhr.open("GET", dummyWallet + "/scan?qr=" + qrString);
+                xhr.onload = function () {
+                    console.log("Mock scan returns", xhr.response)
+                }
+                xhr.send();
+            })
+        }
+
+    </script>
+</body>
+
+</html>
