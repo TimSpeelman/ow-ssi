@@ -1,5 +1,6 @@
 export * from "./api/types";
 export { IPv8Observer } from "./events/IPv8Observer";
+export * from "./IPv8Service";
 export { AttesteeService as IPv8Attestee } from "./services/AttesteeService";
 export { AttesterService as IPv8Attester } from "./services/AttesterService";
 export { PeerService as IPv8PeerService } from "./services/PeerService";

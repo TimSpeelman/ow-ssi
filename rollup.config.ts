@@ -22,6 +22,7 @@ export default {
     "btoa",
     "express",
     "uuid",
+    "lodash",
   ],
   watch: {
     include: 'src/**',
