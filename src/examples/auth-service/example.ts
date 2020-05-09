@@ -2,7 +2,7 @@ import express from "express";
 import path from "path";
 import { VerifyHttpServer } from "../../auth/HttpServer";
 import { IPv8Service } from "../../ipv8/IPv8Service";
-import { OWVerifierService } from "../../ow/OWVerifierService";
+import { OWVerifier } from "../../ow/protocol/OWVerifier";
 import { OWVerifyRequest } from "../../ow/types";
 import { loadTemporaryIPv8Configuration } from "../../util/ipv8conf";
 import { ports } from "../ports";
@@ -60,7 +60,7 @@ const templates = {
     age: ageRequest,
 }
 
-const verifier = new OWVerifierService(ipv8service.verifierService);
+const verifier = new OWVerifier(ipv8service.verifierService);
 
 const server = new VerifyHttpServer(
     templates,

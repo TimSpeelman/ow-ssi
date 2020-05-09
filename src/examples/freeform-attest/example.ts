@@ -5,7 +5,7 @@ import path from "path";
 import QRCode from "qrcode-svg";
 import uuidv4 from "uuid/v4";
 import { IPv8Service } from "../../ipv8/IPv8Service";
-import { OWAttesterService } from "../../ow/OWAttesterService";
+import { OWAttester } from "../../ow/protocol/OWAttester";
 import { OWAttestOffer, OWAttestOfferAttr } from "../../ow/types";
 import { Dict } from "../../types/Dict";
 import { loadTemporaryIPv8Configuration } from "../../util/ipv8conf";
@@ -94,4 +94,4 @@ attestationServer.listen(config.serverPort);
 console.log(`Attestation Server listening at port ${config.serverPort}.`);
 
 
-const attester = new OWAttesterService(ipv8service.attesterService);
+const attester = new OWAttester(ipv8service.attesterService);

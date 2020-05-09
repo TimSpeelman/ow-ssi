@@ -1,3 +1,6 @@
+import { OWVerifyReqAttr, OWVerifyRequest, OWVerifyRespAttr, OWVerifyResponse } from "../types";
+import { IAttributeStore, ResolutionAttributeResult, ResolutionResult } from "./types";
+
 /**
  * This Resolver consumes a VerifyRequest and fetches matching attribute
  * from an AttributeRepository. For now, it does not support Constraints.
@@ -9,14 +12,10 @@
  * The ResolutionResult specifies whether the result was successful, and if
  * so includes a proper OWVerifyResponse.
  */
-
-import { IOWAttributeRepository } from "./IOWAttributeRepository";
-import { AttestedAttr, OWVerifyReqAttr, OWVerifyRequest, OWVerifyRespAttr, OWVerifyResponse } from "./types";
-
 export class OWVerifyRequestResolver {
     constructor(
         private myId: string,
-        private repo: IOWAttributeRepository,
+        private repo: IAttributeStore,
     ) { }
 
     // TODO: Apply constraints
@@ -59,18 +58,4 @@ export class OWVerifyRequestResolver {
         // value
     }
 
-}
-
-export interface ResolutionResult {
-    status: "success" | "unresolved";
-    attributes: ResolutionAttributeResult[];
-    response?: OWVerifyResponse;
-}
-
-export interface ResolutionAttributeResult {
-    ref: string;
-    status: "success" | "ambiguous" | "missing";
-    request: OWVerifyReqAttr;
-    responses: OWVerifyRespAttr[];
-    results: AttestedAttr[];
 }

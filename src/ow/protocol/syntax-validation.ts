@@ -1,4 +1,4 @@
-import { Validate } from '../util/validate';
+import { Validate } from '../../util/validate';
 
 const { number, object, bool, optional, many, hasKey, arrayWithEach, atKey, truthy, string } = Validate
 

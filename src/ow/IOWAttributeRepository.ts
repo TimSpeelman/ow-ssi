@@ -1,8 +1,7 @@
+import { IAttributeStore } from "./resolution/types";
 import { AttestedAttr } from "./types";
 
 
-export interface IOWAttributeRepository {
-    all(): Promise<AttestedAttr[]>
-
+export interface IOWAttributeRepository extends IAttributeStore {
     put(a: AttestedAttr): void
 }

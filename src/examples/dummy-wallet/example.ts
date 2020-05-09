@@ -4,17 +4,17 @@ import cors from "cors";
 import express, { Request, Response } from "express";
 import { VerifyHttpClient } from "../../auth/HttpClient";
 import { IPv8Service } from "../../ipv8/IPv8Service";
-import { OWAttesteeService } from "../../ow/OWAttesteeService";
 import { OWAttributeRepository } from "../../ow/OWAttributeRepository";
-import { OWVerifieeService } from "../../ow/OWVerifieeService";
-import { OWVerifyRequestResolver } from "../../ow/OWVerifyRequestResolver";
+import { OWAttestee } from "../../ow/protocol/OWAttestee";
+import { OWVerifiee } from "../../ow/protocol/OWVerifiee";
+import { OWVerifyRequestResolver } from "../../ow/resolution/OWVerifyRequestResolver";
 import { loadTemporaryIPv8Configuration } from "../../util/ipv8conf";
 import { ports } from "../ports";
 
 class DummyWallet {
 
-    public verifiee: OWVerifieeService;
-    public attestee: OWAttesteeService;
+    public verifiee: OWVerifiee;
+    public attestee: OWAttestee;
     public repo: OWAttributeRepository;
     public resolver: OWVerifyRequestResolver;
 
@@ -24,8 +24,8 @@ class DummyWallet {
         protected port: number,
     ) {
 
-        this.verifiee = new OWVerifieeService(me.verifieeService);
-        this.attestee = new OWAttesteeService(me.attesteeService);
+        this.verifiee = new OWVerifiee(me.verifieeService);
+        this.attestee = new OWAttestee(me.attesteeService);
         this.repo = new OWAttributeRepository();
         this.resolver = new OWVerifyRequestResolver(myId, this.repo);
     }

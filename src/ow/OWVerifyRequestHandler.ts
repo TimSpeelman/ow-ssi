@@ -1,5 +1,6 @@
-import { OWVerifieeService } from "./OWVerifieeService";
-import { OWVerifyRequestResolver, ResolutionResult } from "./OWVerifyRequestResolver";
+import { OWVerifiee } from "./protocol/OWVerifiee";
+import { OWVerifyRequestResolver } from "./resolution/OWVerifyRequestResolver";
+import { ResolutionResult } from "./resolution/types";
 import { OWVerifyRequest } from "./types";
 
 export class OWVerifyRequestHandler {
@@ -11,7 +12,7 @@ export class OWVerifyRequestHandler {
 
     constructor(
         private resolver: OWVerifyRequestResolver,
-        private verifieeService: OWVerifieeService,
+        private verifieeService: OWVerifiee,
         private allowWithoutReference = false) {
 
     }

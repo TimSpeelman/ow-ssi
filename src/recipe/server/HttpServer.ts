@@ -2,8 +2,8 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
 import { IPv8Service } from "../../ipv8/IPv8Service";
-import { OWAttesterService } from "../../ow/OWAttesterService";
-import { OWVerifierService } from "../../ow/OWVerifierService";
+import { OWAttester } from "../../ow/protocol/OWAttester";
+import { OWVerifier } from "../../ow/protocol/OWVerifier";
 import { OWAttestOffer, OWVerifyRequest, OWVerifyRespAttr, OWVerifyResponse } from "../../ow/types";
 import { Dict } from "../../types/Dict";
 import { ProcedureConfig } from "../../types/types";
@@ -55,7 +55,7 @@ export class HttpServer {
         }
 
         if (config.desc.requirements.length > 0) {
-            const v = new OWVerifierService(this.ipv8.verifierService)
+            const v = new OWVerifier(this.ipv8.verifierService)
 
             // VerifyRequest (could be cleaner)
             const vReq: OWVerifyRequest = {
@@ -93,7 +93,7 @@ export class HttpServer {
 
         }
 
-        const a = new OWAttesterService(this.ipv8.attesterService)
+        const a = new OWAttester(this.ipv8.attesterService)
 
         const attributes = await config.resolver(credentials);
 

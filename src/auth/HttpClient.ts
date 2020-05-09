@@ -1,11 +1,11 @@
 import Axios from "axios";
-import { OWVerifieeService } from "../ow/OWVerifieeService";
+import { OWVerifiee } from "../ow/protocol/OWVerifiee";
 import { OWVerifyRequest, OWVerifyResponse } from "../ow/types";
 
 export class VerifyHttpClient {
 
     constructor(
-        protected verifieeService: OWVerifieeService,
+        protected verifieeService: OWVerifiee,
     ) { }
 
     getVerifyRequest(url: string): Promise<OWVerifyRequest> {

@@ -1,18 +1,14 @@
-/**
- * Verifier 
- */
-
-import { AttributeWithHash } from "../ipv8/services/types/Attribute";
-import { VerifierService } from "../ipv8/services/VerifierService";
+import { AttributeWithHash } from "../../ipv8/services/types/Attribute";
+import { VerifierService } from "../../ipv8/services/VerifierService";
+import { OWVerifyRequest, OWVerifyResponse } from "../types";
 import { OWVerifyResponseValidator } from "./syntax-validation";
-import { OWVerifyRequest, OWVerifyResponse } from "./types";
 
+/**
+ * Takes an OW:VerifyRequest and OW:VerifyResponse and performs IPv8 validation as Validator.
+ */
+export class OWVerifier {
 
-export class OWVerifierService {
-
-    constructor(
-        private ipv8Verifier: VerifierService
-    ) { }
+    constructor(private ipv8Verifier: VerifierService) { }
 
     // TODO: apply constraints
     validateResponse(req: OWVerifyRequest, resp: OWVerifyResponse): string[] {
@@ -62,7 +58,7 @@ export class OWVerifierService {
 
     }
 
-
+    /** Perform IPv8 Verification */
     verify(req: OWVerifyRequest, resp: OWVerifyResponse) {
         const credentials: AttributeWithHash[] = resp.attributes.map((respAttr) => {
             const reqAttr = req.attributes.find(a => a.ref === respAttr.ref);

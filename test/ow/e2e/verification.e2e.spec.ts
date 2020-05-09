@@ -1,10 +1,10 @@
 import fs from "fs";
 import { Attestation } from "../../../src/ipv8/api/types";
 import { IPv8Service } from "../../../src/ipv8/IPv8Service";
-import { OWVerifieeService } from "../../../src/ow/OWVerifieeService";
-import { OWVerifierService } from "../../../src/ow/OWVerifierService";
 import { OWVerifyRequestHandler } from "../../../src/ow/OWVerifyRequestHandler";
-import { OWVerifyRequestResolver } from "../../../src/ow/OWVerifyRequestResolver";
+import { OWVerifiee } from "../../../src/ow/protocol/OWVerifiee";
+import { OWVerifier } from "../../../src/ow/protocol/OWVerifier";
+import { OWVerifyRequestResolver } from "../../../src/ow/resolution/OWVerifyRequestResolver";
 import { OWVerifyRequest, OWVerifyResponse } from "../../../src/ow/types";
 import { before, describe, expect, it } from "../../tools";
 import { mockRepo } from "../mockRepo";
@@ -30,8 +30,8 @@ describe("OWVerification end-to-end", () => {
     alice.start();
     bob.start();
 
-    const verifiee = new OWVerifieeService(alice.verifieeService);
-    const verifier = new OWVerifierService(bob.verifierService);
+    const verifiee = new OWVerifiee(alice.verifieeService);
+    const verifier = new OWVerifier(bob.verifierService);
 
     const vReq1: OWVerifyRequest = {
         ref: "abc",

@@ -3,7 +3,7 @@ import cors from "cors";
 import express, { Request, Response } from "express";
 import QRCode from "qrcode-svg";
 import uuid from "uuid/v4";
-import { OWVerifierService } from "../ow/OWVerifierService";
+import { OWVerifier } from "../ow/protocol/OWVerifier";
 import { OWVerifyRequest, OWVerifyResponse } from "../ow/types";
 import { Dict } from "../types/Dict";
 import { paths, VerifyResult } from "./IVerifyServerAPI";
@@ -22,7 +22,7 @@ export class VerifyHttpServer {
     constructor(
         private templates: Dict<OWVerifyRequest>,
         private port: number,
-        private verifier: OWVerifierService,
+        private verifier: OWVerifier,
         private logger: (...args: any[]) => void = console.log,
     ) {
 
