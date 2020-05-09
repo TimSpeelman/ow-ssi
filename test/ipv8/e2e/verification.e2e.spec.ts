@@ -3,9 +3,8 @@ import { Attestation } from "../../../src/ipv8/api/types";
 import { IPv8Service } from "../../../src/ipv8/IPv8Service";
 import { describe, expect, it } from "../../tools";
 
-const aliceConf = JSON.parse(fs.readFileSync('temp/server-kvk/config.json', { encoding: 'utf8' }))
-// const bobConf = JSON.parse(fs.readFileSync('temp/server-brp/config.json', { encoding: 'utf8' }))
-const bobConf = JSON.parse(fs.readFileSync('temp/client/config.json', { encoding: 'utf8' }))
+const aliceConf = JSON.parse(fs.readFileSync('temp/test-alice/config.json', { encoding: 'utf8' }))
+const bobConf = JSON.parse(fs.readFileSync('temp/test-bob/config.json', { encoding: 'utf8' }))
 
 const config = {
     aliceUrl: `http://localhost:${aliceConf.port}`,
@@ -87,7 +86,7 @@ describe("IPv8Service e2e Verification", () => {
 
     /** Lets Bob attest to Alice */
     async function attestToAlice(name: string, value: string): Promise<Attestation> {
-        bob.attesterService.stageAttestation(config.aliceMid, { attribute_name: name, attribute_value: value }, Date.now() + 10000)
+        bob.attesterService.stageAttestation(config.aliceMid, [{ attribute_name: name, attribute_value: value }], Date.now() + 10000)
         return alice.attesteeService.requestAttestation(config.bobMid, [{ attribute_name: name, id_format: "id_metadata" }])
             .then(attestations => attestations[0]);
     }
