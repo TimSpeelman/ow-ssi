@@ -1,4 +1,4 @@
-import { OWVerifyResponse } from "../ow/types";
+import { OWVerifyResponse } from "../ow/protocol/types";
 
 /** The API endpoint paths */
 export const paths: { [k in keyof IVerifyServerAPI]: string } = {

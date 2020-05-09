@@ -4,7 +4,7 @@ import express, { NextFunction, Request, Response } from "express";
 import { IPv8Service } from "../../ipv8/IPv8Service";
 import { OWAttester } from "../../ow/protocol/OWAttester";
 import { OWVerifier } from "../../ow/protocol/OWVerifier";
-import { OWAttestOffer, OWVerifyRequest, OWVerifyRespAttr, OWVerifyResponse } from "../../ow/types";
+import { OWAttestOffer, OWVerifyRequest, OWVerifyRespAttr, OWVerifyResponse } from "../../ow/protocol/types";
 import { Dict } from "../../types/Dict";
 import { ProcedureConfig } from "../../types/types";
 import { paths, ReqProcedure, ServerDescriptor } from "./IAttestationServerRESTAPI";

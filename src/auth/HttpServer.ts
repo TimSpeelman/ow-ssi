@@ -4,7 +4,7 @@ import express, { Request, Response } from "express";
 import QRCode from "qrcode-svg";
 import uuid from "uuid/v4";
 import { OWVerifier } from "../ow/protocol/OWVerifier";
-import { OWVerifyRequest, OWVerifyResponse } from "../ow/types";
+import { OWVerifyRequest, OWVerifyResponse } from "../ow/protocol/types";
 import { Dict } from "../types/Dict";
 import { paths, VerifyResult } from "./IVerifyServerAPI";
 

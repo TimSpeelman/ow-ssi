@@ -6,7 +6,7 @@ import QRCode from "qrcode-svg";
 import uuidv4 from "uuid/v4";
 import { IPv8Service } from "../../ipv8/IPv8Service";
 import { OWAttester } from "../../ow/protocol/OWAttester";
-import { OWAttestOffer, OWAttestOfferAttr } from "../../ow/types";
+import { OWAttestOffer, OWAttestOfferAttr } from "../../ow/protocol/types";
 import { Dict } from "../../types/Dict";
 import { loadTemporaryIPv8Configuration } from "../../util/ipv8conf";
 import { ports } from "../ports";

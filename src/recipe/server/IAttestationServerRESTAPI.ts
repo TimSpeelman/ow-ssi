@@ -1,4 +1,4 @@
-import { OWAttestOffer } from "../../ow/types";
+import { OWAttestOffer } from "../../ow/protocol/types";
 import { Dict } from "../../types/Dict";
 import { Credential, ProcedureDescription } from '../../types/types';
 

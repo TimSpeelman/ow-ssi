@@ -1,6 +1,6 @@
 import Axios from "axios";
 import { OWVerifiee } from "../ow/protocol/OWVerifiee";
-import { OWVerifyRequest, OWVerifyResponse } from "../ow/types";
+import { OWVerifyRequest, OWVerifyResponse } from "../ow/protocol/types";
 
 export class VerifyHttpClient {
 

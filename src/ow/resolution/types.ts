@@ -1,4 +1,4 @@
-import { AttestedAttr, OWVerifyReqAttr, OWVerifyRespAttr, OWVerifyResponse } from "../types";
+import { AttestedAttr, OWVerifyReqAttr, OWVerifyRespAttr, OWVerifyResponse } from "../protocol/types";
 
 export interface IAttributeStore {
     all(): Promise<AttestedAttr[]>

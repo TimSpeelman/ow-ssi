@@ -1,7 +1,7 @@
 import { OWVerifiee } from "./protocol/OWVerifiee";
+import { OWVerifyRequest } from "./protocol/types";
 import { OWVerifyRequestResolver } from "./resolution/OWVerifyRequestResolver";
 import { ResolutionResult } from "./resolution/types";
-import { OWVerifyRequest } from "./types";
 
 export class OWVerifyRequestHandler {
 

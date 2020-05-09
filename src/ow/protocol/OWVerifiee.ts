@@ -1,6 +1,6 @@
 import { VerifieeService } from "../../ipv8/services/VerifieeService";
-import { OWVerifyRequest } from "../types";
 import { OWVerifyRequestValidator } from "./syntax-validation";
+import { OWVerifyRequest } from "./types";
 
 /**
  * Takes an <OW:VerifyRequest> and executes IPv8 verification as Verifiee.

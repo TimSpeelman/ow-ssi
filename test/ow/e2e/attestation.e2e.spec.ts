@@ -2,13 +2,13 @@ import fs from "fs";
 import { IPv8Service } from "../../../src/ipv8/IPv8Service";
 import { OWAttestee } from "../../../src/ow/protocol/OWAttestee";
 import { OWAttester } from "../../../src/ow/protocol/OWAttester";
-import { OWAttestOffer } from "../../../src/ow/types";
+import { OWAttestOffer } from "../../../src/ow/protocol/types";
 import { describe, expect, it } from "../../tools";
 
 const prefix = "ow-verif-";
 
-const aliceConf = JSON.parse(fs.readFileSync('temp/server-kvk/config.json', { encoding: 'utf8' }))
-const chrisConf = JSON.parse(fs.readFileSync('temp/client/config.json', { encoding: 'utf8' }))
+const aliceConf = JSON.parse(fs.readFileSync('temp/test-alice/config.json', { encoding: 'utf8' }))
+const chrisConf = JSON.parse(fs.readFileSync('temp/test-bob/config.json', { encoding: 'utf8' }))
 
 const config = {
     aliceUrl: `http://localhost:${aliceConf.port}`,

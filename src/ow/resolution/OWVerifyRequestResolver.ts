@@ -1,4 +1,4 @@
-import { OWVerifyReqAttr, OWVerifyRequest, OWVerifyRespAttr, OWVerifyResponse } from "../types";
+import { OWVerifyReqAttr, OWVerifyRequest, OWVerifyRespAttr, OWVerifyResponse } from "../protocol/types";
 import { IAttributeStore, ResolutionAttributeResult, ResolutionResult } from "./types";
 
 /**

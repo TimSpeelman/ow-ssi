@@ -4,8 +4,8 @@ import { IPv8Service } from "../../../src/ipv8/IPv8Service";
 import { OWVerifyRequestHandler } from "../../../src/ow/OWVerifyRequestHandler";
 import { OWVerifiee } from "../../../src/ow/protocol/OWVerifiee";
 import { OWVerifier } from "../../../src/ow/protocol/OWVerifier";
+import { OWVerifyRequest, OWVerifyResponse } from "../../../src/ow/protocol/types";
 import { OWVerifyRequestResolver } from "../../../src/ow/resolution/OWVerifyRequestResolver";
-import { OWVerifyRequest, OWVerifyResponse } from "../../../src/ow/types";
 import { before, describe, expect, it } from "../../tools";
 import { mockRepo } from "../mockRepo";
 

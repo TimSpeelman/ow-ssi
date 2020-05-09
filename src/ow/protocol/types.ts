@@ -34,15 +34,6 @@ export interface OWVerifyRespAttr {
     value?: string;
 }
 
-export interface AttestedAttr {
-    name: string;
-    value: string;
-    format: string;
-    hash: string;
-    signer_mid_b64: string;
-    metadata: any;
-}
-
 export interface OWAttestOffer {
     attester_id: string;
     ref: string;
@@ -56,4 +47,13 @@ export interface OWAttestOfferAttr {
     name: string;
     format: string;
     value: string;
+}
+
+export interface AttestedAttr {
+    name: string;
+    value: string;
+    format: string;
+    hash: string;
+    signer_mid_b64: string;
+    metadata: any;
 }

@@ -3,7 +3,7 @@ import path from "path";
 import { VerifyHttpServer } from "../../auth/HttpServer";
 import { IPv8Service } from "../../ipv8/IPv8Service";
 import { OWVerifier } from "../../ow/protocol/OWVerifier";
-import { OWVerifyRequest } from "../../ow/types";
+import { OWVerifyRequest } from "../../ow/protocol/types";
 import { loadTemporaryIPv8Configuration } from "../../util/ipv8conf";
 import { ports } from "../ports";
 

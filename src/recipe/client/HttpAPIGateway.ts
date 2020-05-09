@@ -1,5 +1,5 @@
 import { AxiosError, AxiosInstance } from 'axios';
-import { OWAttestOffer } from "../../ow/types";
+import { OWAttestOffer } from "../../ow/protocol/types";
 import { toHttpError } from "../../util/HttpError";
 import { IAttestationServerRESTAPI, ReqProcedure, ServerDescriptor } from '../server/IAttestationServerRESTAPI';
 

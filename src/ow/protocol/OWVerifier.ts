@@ -1,7 +1,7 @@
 import { AttributeWithHash } from "../../ipv8/services/types/Attribute";
 import { VerifierService } from "../../ipv8/services/VerifierService";
-import { OWVerifyRequest, OWVerifyResponse } from "../types";
 import { OWVerifyResponseValidator } from "./syntax-validation";
+import { OWVerifyRequest, OWVerifyResponse } from "./types";
 
 /**
  * Takes an OW:VerifyRequest and OW:VerifyResponse and performs IPv8 validation as Validator.

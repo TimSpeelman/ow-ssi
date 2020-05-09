@@ -1,7 +1,7 @@
 import { AttesteeService } from "../../ipv8/services/AttesteeService";
 import { AttestationSpec } from "../../ipv8/services/types/IAttesteeService";
-import { AttestedAttr, OWAttestOffer } from "../types";
 import { OWAttestOfferValidator } from "./syntax-validation";
+import { AttestedAttr, OWAttestOffer } from "./types";
 
 /**
  * Takes an <OW:AttestOffer> and invokes IPv8 attestation as Attestee.

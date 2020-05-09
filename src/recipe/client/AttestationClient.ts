@@ -4,7 +4,7 @@ import { Attestation } from "../../ipv8/api/types";
 import { Attribute } from '../../ipv8/services/types/Attribute';
 import { AttestationSpec, IAttesteeService } from "../../ipv8/services/types/IAttesteeService";
 import { IVerifieeService } from '../../ipv8/services/types/IVerifieeService';
-import { OWAttestOffer } from "../../ow/types";
+import { OWAttestOffer } from "../../ow/protocol/types";
 import { ServerDescriptor } from "../../recipe/server/IAttestationServerRESTAPI";
 import { Dict } from '../../types/Dict';
 import { ClientProcedure, Credential, PeerId } from '../../types/types';
