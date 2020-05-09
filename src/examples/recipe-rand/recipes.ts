@@ -1,5 +1,5 @@
 import uuid from "uuid/v4";
-import { RecipeConfiguration } from "../../recipe/server/RecipeServer";
+import { RecipeConfiguration } from "../../recipe/RecipeServer";
 import { Dict } from "../../types/Dict";
 
 export const RandRecipes: Dict<RecipeConfiguration> = {
