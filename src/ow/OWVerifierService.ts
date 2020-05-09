@@ -4,6 +4,7 @@
 
 import { AttributeWithHash } from "../ipv8/services/types/Attribute";
 import { VerifierService } from "../ipv8/services/VerifierService";
+import { OWVerifyResponseValidator } from "./syntax-validation";
 import { OWVerifyRequest, OWVerifyResponse } from "./types";
 
 
@@ -16,40 +17,39 @@ export class OWVerifierService {
     // TODO: apply constraints
     validateResponse(req: OWVerifyRequest, resp: OWVerifyResponse): string[] {
 
+        const formatErrors = OWVerifyResponseValidator(resp);
+
+        if (formatErrors) {
+            return [formatErrors];
+        }
+
+        // Continue with semantic validation
+
         const errors = [];
 
         if (req.ref !== resp.ref) {
             errors.push("References do not match")
         }
 
-        if (!resp.subject_id) {
-            errors.push("Missing subject ID");
-        }
-
         if (req.subject_id && resp.subject_id !== req.subject_id) {
-            errors.push("Invalid subject ID");
+            errors.push("Subject ID different from request");
         }
 
-        if (req.attributes.length != resp.attributes.length) {
+        if (req.attributes.length !== resp.attributes.length) {
             errors.push("Invalid number of attributes");
         }
 
         const queue = req.attributes.slice();
 
         resp.attributes.forEach(respAttr => {
-            if (!respAttr) {
-                errors.push(`Falsy attribute provided`)
+            const index = queue.findIndex(a => a.ref === respAttr.ref);
+
+            if (index < 0) {
+                errors.push(`Provided attribute with ref '${respAttr.ref}' was not requested`)
             } else {
-
-                const index = queue.findIndex(a => a.ref === respAttr.ref);
-
-                if (index < 0) {
-                    errors.push(`Provided attribute with ref '${respAttr.ref}' was not requested`)
-                } else {
-                    const reqAttr = queue.splice(index, 1)[0];
-                    if (reqAttr.include_value && !respAttr.value) {
-                        errors.push(`Missing value for attribute with ref '${respAttr.ref}'`)
-                    }
+                const reqAttr = queue.splice(index, 1)[0];
+                if (reqAttr.include_value && !respAttr.value) {
+                    errors.push(`Missing value for attribute with ref '${respAttr.ref}'`)
                 }
             }
         })
