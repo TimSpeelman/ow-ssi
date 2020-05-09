@@ -10,13 +10,13 @@
  * so includes a proper OWVerifyResponse.
  */
 
-import { OWAttributeRepository } from "./OWAttributeRepository";
+import { IOWAttributeRepository } from "./IOWAttributeRepository";
 import { AttestedAttr, OWVerifyReqAttr, OWVerifyRequest, OWVerifyRespAttr, OWVerifyResponse } from "./types";
 
 export class OWVerifyRequestResolver {
     constructor(
         private myId: string,
-        private repo: OWAttributeRepository,
+        private repo: IOWAttributeRepository,
     ) { }
 
     // TODO: Apply constraints

@@ -11,9 +11,9 @@ import { mockRepo } from "../mockRepo";
 
 const prefix = "ow-verif-";
 
-const aliceConf = JSON.parse(fs.readFileSync('temp/server-kvk/config.json', { encoding: 'utf8' }))
+const aliceConf = JSON.parse(fs.readFileSync('temp/test-alice/config.json', { encoding: 'utf8' }))
 // const bobConf = JSON.parse(fs.readFileSync('temp/server-brp/config.json', { encoding: 'utf8' }))
-const bobConf = JSON.parse(fs.readFileSync('temp/client/config.json', { encoding: 'utf8' }))
+const bobConf = JSON.parse(fs.readFileSync('temp/test-bob/config.json', { encoding: 'utf8' }))
 
 const config = {
     aliceUrl: `http://localhost:${aliceConf.port}`,
@@ -108,6 +108,10 @@ describe("OWVerification end-to-end", () => {
         await alicesHandler.handleRequest(vReq1);
 
         // Alice sends <OW:VerifyResponse> to Bob (via some transport)
+
+        // Bob validates the response
+        const errors = verifier.validateResponse(vReq1, response);
+        expect(errors).to.deep.equal([], "Expected response validation to pass");
 
         // Bob requests verification
         const verification = await verifier.verify(vReq1, response);

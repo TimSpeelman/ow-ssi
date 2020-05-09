@@ -1,8 +1,9 @@
-import { OWAttributeRepository } from "../../src/ow/OWAttributeRepository";
+import { IOWAttributeRepository } from "../../src/ow/IOWAttributeRepository";
 import { AttestedAttr } from "../../src/ow/types";
 
-export function mockRepo(attestedAttrs: AttestedAttr[]): OWAttributeRepository {
+export function mockRepo(attestedAttrs: AttestedAttr[]): IOWAttributeRepository {
     return {
-        all: () => Promise.resolve(attestedAttrs)
+        all: () => Promise.resolve(attestedAttrs),
+        put: () => { },
     }
 }
