@@ -31,6 +31,7 @@ export class AttesterService implements IAttesterService {
 
     /** Attest to a peer some attributes within a certain time */
     public stageAttestation(mid_b64: string, attributes: Attribute[], validUntil: number): void {
+        this.requireIPv8Observer();
         attributes.forEach(attribute => this.putGrant(mid_b64, { attribute, validUntil }))
     }
 
@@ -79,5 +80,11 @@ export class AttesterService implements IAttesterService {
 
     protected getGrantsByPeer(mid_b64: string): QueuedAttestation[] {
         return Object.values(this.queue[mid_b64] || {})
+    }
+
+    protected requireIPv8Observer() {
+        if (!this.observer) {
+            throw new Error("IPv8 observer is not running");
+        }
     }
 }

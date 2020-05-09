@@ -34,6 +34,7 @@ export class VerifieeService implements IVerifieeService {
         attribute_names: string[],
         validUntil: number
     ): Promise<any> {
+        this.requireIPv8Observer();
         return Promise.all(attribute_names.map(attr => this.stageSingle(mid_b64, attr, validUntil)))
     }
 
@@ -98,6 +99,12 @@ export class VerifieeService implements IVerifieeService {
 
     protected getGrantsByPeer(mid_b64: string): VerificationGrant[] {
         return Object.values(this.stage[mid_b64] || {})
+    }
+
+    protected requireIPv8Observer() {
+        if (!this.observer) {
+            throw new Error("IPv8 observer is not running");
+        }
     }
 }
 

@@ -7,7 +7,7 @@ export class PeerService {
 
     constructor(
         private api: IPv8API,
-        observer: IPv8Observer,
+        private observer: IPv8Observer,
     ) {
         observer.onPeerFound(peerId => {
             if (peerId in this.awaits) {
@@ -18,7 +18,10 @@ export class PeerService {
     }
 
     /** Finds a peer by Member ID, or rejects after a timeout */
-    findPeer(peerId: string, timeoutInMillis = 1000): Promise<boolean> {
+    findPeer(peerId: string, timeoutInMillis = 2000): Promise<boolean> {
+        if (!this.observer.isRunning) {
+            throw new Error("IPv8 observer is not running.");
+        }
         return new Promise(async (resolve, reject) => {
             const peers = await this.api.listPeers();
 
@@ -39,7 +42,7 @@ export class PeerService {
                 timer = setTimeout(() => {
                     this.awaits[peerId] = this.awaits[peerId].filter(cb => cb !== callback);
                     reject(new Error(`Timeout. Could not locate peer ${peerId}.`));
-                })
+                }, timeoutInMillis)
 
                 // Add the callback to waiting list.
                 this.awaits[peerId] = [...(this.awaits[peerId] || []), callback];

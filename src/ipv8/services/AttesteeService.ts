@@ -11,7 +11,7 @@ export class AttesteeService implements IAttesteeService {
 
     constructor(
         private api: IPv8API,
-        private ipv8observer: IPv8Observer,
+        private observer: IPv8Observer,
         private peerService: PeerService,
     ) { }
 
@@ -19,6 +19,7 @@ export class AttesteeService implements IAttesteeService {
         mid_b64: string,
         credentials: AttestationSpec[],
     ): Promise<Attestation[]> {
+        this.requireIPv8Observer();
 
         let results = [];
         for (let c of credentials) {
@@ -34,6 +35,7 @@ export class AttesteeService implements IAttesteeService {
         attribute_name: string,
         id_format: string
     ): Promise<Attestation> {
+        this.requireIPv8Observer();
 
         return new Promise(async (resolve, reject) => {
             try {
@@ -41,7 +43,7 @@ export class AttesteeService implements IAttesteeService {
 
                 this.api.requestAttestation(mid_b64, attribute_name, id_format);
 
-                this.ipv8observer.onAttestation((attestation) => {
+                this.observer.onAttestation((attestation) => {
                     if (attribute_name === attestation.attribute_name) {
                         resolve(attestation);
                     }
@@ -50,5 +52,11 @@ export class AttesteeService implements IAttesteeService {
                 reject(err);
             }
         });
+    }
+
+    protected requireIPv8Observer() {
+        if (!this.observer) {
+            throw new Error("IPv8 observer is not running");
+        }
     }
 }
