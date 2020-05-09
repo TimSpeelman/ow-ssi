@@ -31,6 +31,7 @@ names = [
     'freeform-attest', 
     'kvk',
     'brp',
+    'rand',
     'test-alice',
     'test-bob',
     ]

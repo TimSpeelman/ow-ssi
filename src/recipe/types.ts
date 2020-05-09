@@ -51,3 +51,19 @@ export interface RecipeRequest {
     verify_response?: OWVerifyResponse,
     subject_id: string,
 }
+
+
+export interface RecipeServiceDescriptor {
+    id: string;
+    mid_b64: string;
+    url: string;
+    recipe_url: string;
+    /** Title for each language */
+    title: Dict<string>;
+    /** Description for each language */
+    description: Dict<string>;
+    website: string;
+    logo_url: string;
+    /** All available recipes at this provider */
+    recipes: Dict<Recipe>;
+}

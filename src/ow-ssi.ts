@@ -14,3 +14,4 @@ export { OWVerifyRequestResolver } from "./ow/resolution/OWVerifyRequestResolver
 export { AttestationClient } from './recipe/client/AttestationClient';
 export { AttestationClientConfig, AttestationClientFactory } from "./recipe/client/AttestationClientFactory";
 export { ClientProcedure, ProcedureDescription } from "./types/types";
+

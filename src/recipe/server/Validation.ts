@@ -1,22 +1,10 @@
 import { Validate } from '../../util/validate';
+import { RecipeRequestValidator } from "../syntax-validation";
 
 const { many, hasKey, arrayWithEach, atKey } = Validate
 
 export const Validation = {
-    initiate: many([
-        hasKey('procedure_id'),
-        hasKey('mid_b64'),
-        hasKey('credentials'),
-        atKey(
-            'credentials',
-            arrayWithEach(
-                many([
-                    hasKey('attribute_name'),
-                    hasKey('attribute_value'),
-                    hasKey('attribute_hash'),
-                ])
-            )
-        )
+    postRecipe: many([
+        atKey('request', RecipeRequestValidator)
     ]),
-    staged: hasKey('mid_b64')
 }

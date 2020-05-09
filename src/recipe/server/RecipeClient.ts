@@ -8,6 +8,9 @@ type Connection = {
     send: (message: any) => Promise<any>
 }
 
+/**
+ * Execute an Open Wallet Recipe as client.
+ */
 export class RecipeClient {
 
     constructor(

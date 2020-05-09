@@ -43,7 +43,7 @@ export class HttpServer {
 
         // Validate Request
         const data = req.body;
-        const error = Validation.initiate(data);
+        const error = Validation.postRecipe(data);
         if (error !== false) {
             return this.sendInvalidRequest(res, `Validation Error: ${error}`);
         }
