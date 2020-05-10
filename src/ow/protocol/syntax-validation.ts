@@ -1,6 +1,6 @@
 import { Validate } from '../../util/validate';
 
-const { number, object, bool, optional, many, hasKey, arrayWithEach, atKey, truthy, string } = Validate
+const { length, number, object, bool, optional, many, hasKey, arrayWithEach, atKey, truthy, string } = Validate
 
 /** 
  * Validation for all OpenWallet messages regarding structural correctness 
@@ -20,7 +20,7 @@ export const OWVerifyRequestValidator = many([
     atKey("verifier_id", string),
     atKey("ref", optional(string)),
     atKey("attributes", arrayWithEach(OWVerifyReqAttrValidator)),
-    atKey("subject_id", optional(string)),
+    atKey("subject_id", optional(many([string, length(1)]))),
     atKey("reason", optional(string)),
     atKey("http_return_address", optional(string)),
 ]);
@@ -35,7 +35,7 @@ export const OWVerifyRespAttrValidator = many([
 export const OWVerifyResponseValidator = many([
     object,
     atKey("ref", optional(string)),
-    atKey("subject_id", string),
+    atKey("subject_id", many([string, length(1)])),
     atKey("request_hash", string),
     atKey("attributes", arrayWithEach(OWVerifyRespAttrValidator)),
 ])
@@ -51,7 +51,7 @@ export const OWAttestOfferAttrValidator = many([
 
 export const OWAttestOfferValidator = many([
     object,
-    atKey("attester_id", string),
+    atKey("attester_id", many([string, length(1)])),
     atKey("ref", optional(string)),
     atKey("subject_id", optional(string)),
     atKey("attributes", arrayWithEach(OWAttestOfferAttrValidator)),

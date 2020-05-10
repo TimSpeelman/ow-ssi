@@ -13,6 +13,9 @@ const V = {
     truthy: (d: any) => (d ? false : 'Expected value to be truthy'),
     object: (d: any) => (d instanceof Object ? false : 'Expected value to be an object'),
     array: (d: any) => (d instanceof Array ? false : 'Expected value to be an array'),
+    length: (min: number, max?: number) =>
+        (d: any) => d.length < min ? `Expected length to be at least ${min}` :
+            (max !== undefined && d.length > max) ? `Expected length to be at most ${max}` : false,
     number: (d: any) => (typeof d === 'number' ? false : 'Expected value to be a number'),
     string: (d: any) => (typeof d === 'string' ? false : 'Expected value to be a string'),
     hasKey: (key: string) =>

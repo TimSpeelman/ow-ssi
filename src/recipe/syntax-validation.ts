@@ -1,7 +1,7 @@
 import { OWVerifyRequestValidator, OWVerifyResponseValidator } from "../ow/protocol/syntax-validation";
 import { Validate } from '../util/validate';
 
-const { number, object, bool, optional, many, hasKey, arrayWithEach, atKey, truthy, string } = Validate
+const { length, object, bool, optional, many, hasKey, arrayWithEach, atKey, truthy, string } = Validate
 
 export const AttributeDescriptionValidator = many([
     object,
@@ -24,5 +24,5 @@ export const RecipeRequestValidator = many([
     object,
     atKey("recipe_name", string),
     atKey("verify_response", optional(OWVerifyResponseValidator)),
-    atKey("subject_id", string),
+    atKey("subject_id", many([string, length(1)])),
 ])
