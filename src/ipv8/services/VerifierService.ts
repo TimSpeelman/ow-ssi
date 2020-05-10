@@ -16,7 +16,7 @@ export class VerifierService implements IVerifierService {
         private api: IPv8API,
         private observer: IPv8Observer,
         private peerService: PeerService,
-        private verificationThreshold = 0.99999999,
+        private verificationThreshold = 0.99,
     ) { }
 
     public verify(
