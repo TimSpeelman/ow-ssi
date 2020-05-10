@@ -1,6 +1,6 @@
 import { OWAttestee } from "../ow/protocol/OWAttestee";
 import { OWVerifiee } from "../ow/protocol/OWVerifiee";
-import { OWAttestOffer, OWVerifyResponse } from "../ow/protocol/types";
+import { AttestedAttr, OWAttestOffer, OWVerifyResponse } from "../ow/protocol/types";
 import { Recipe, RecipeRequest } from "./types";
 
 
@@ -10,17 +10,19 @@ type Connection = {
 
 /**
  * Execute an Open Wallet Recipe as client.
+ * 
+ * Child implementations of this abstract class can specify the protocol/transport
+ * of sending a request to the RecipeServer and the logic to consent to attestation.
  */
-export class RecipeClient {
+export abstract class RecipeClient {
 
     constructor(
         protected myId: string,
         protected verifiee: OWVerifiee,
         protected attestee: OWAttestee,
-        protected connection: Connection,
     ) { }
 
-    async requestRecipe(recipe: Recipe, vResp?: OWVerifyResponse): Promise<OWAttestOffer> {
+    async requestRecipe(recipe: Recipe, vResp?: OWVerifyResponse): Promise<AttestedAttr[]> {
         const request = this.makeRecipeRequest(recipe, vResp);
 
         if (recipe.verify_request) {
@@ -28,18 +30,25 @@ export class RecipeClient {
             this.verifiee.allowVerification(recipe.verify_request, validUntil);
         }
 
-        // TODO send request
-        const offer: OWAttestOffer = await this.connection.send(request);
+        const offer: OWAttestOffer = await this.sendRequestToServer(recipe, request);
 
         const errors = this.validateOffer(recipe, offer);
         if (errors.length > 0) {
             throw new Error("Illegal server offer: " + errors[0]);
         }
 
-        return offer;
+        if (await this.consentToAttestation(recipe, offer)) {
+            return this.attestee.requestAttestationByOffer(offer);
+        } else {
+            return [];
+        }
     }
 
-    validateOffer(recipe: Recipe, offer: OWAttestOffer): string[] {
+    protected abstract sendRequestToServer(recipe: Recipe, request: RecipeRequest): Promise<OWAttestOffer>
+
+    protected abstract consentToAttestation(recipe: Recipe, offer: OWAttestOffer): Promise<boolean>
+
+    protected validateOffer(recipe: Recipe, offer: OWAttestOffer): string[] {
         const queue = offer.attributes;
         const syntaxError = this.attestee.validateOffer(offer);
         if (syntaxError) {
@@ -65,7 +74,7 @@ export class RecipeClient {
         return errors;
     }
 
-    makeRecipeRequest(recipe: Recipe, vResp: OWVerifyResponse): RecipeRequest {
+    protected makeRecipeRequest(recipe: Recipe, vResp: OWVerifyResponse): RecipeRequest {
         return {
             recipe_name: recipe.name,
             subject_id: this.myId,

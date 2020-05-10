@@ -38,6 +38,8 @@ export interface Recipe {
     title: Dict<string>;
     verify_request?: OWVerifyRequest; // this may not be entirely suitable
 
+    service_endpoint: string;
+
     /** The attributes that are offered by this recipe */
     attributes: AttributeDescription[];
 }

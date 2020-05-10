@@ -15,6 +15,7 @@ export const RecipeValidator = many([
     atKey("name", string),
     atKey("url", string),
     atKey("title", object), // TODO
+    atKey("service_endpoint", string),
     atKey("verify_request", optional(OWVerifyRequestValidator)),
     atKey("attributes", arrayWithEach(AttributeDescriptionValidator))
 ])

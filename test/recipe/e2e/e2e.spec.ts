@@ -1,9 +1,10 @@
 import { IPv8Service } from "../../../src/ipv8/IPv8Service";
 import { OWAttestee } from "../../../src/ow/protocol/OWAttestee";
 import { OWVerifiee } from "../../../src/ow/protocol/OWVerifiee";
+import { OWAttestOffer } from "../../../src/ow/protocol/types";
 import { RecipeClient } from "../../../src/recipe/RecipeClient";
 import { RecipeConfiguration, RecipeServer } from "../../../src/recipe/RecipeServer";
-import { RecipeRequest } from "../../../src/recipe/types";
+import { Recipe, RecipeRequest } from "../../../src/recipe/types";
 import { loadTemporaryIPv8Configuration } from "../../../src/util/ipv8conf";
 import { describe, expect, it } from "../../tools";
 
@@ -30,6 +31,7 @@ const recipe0: RecipeConfiguration = {
     recipe: {
         name: "recipe0",
         title: {},
+        service_endpoint: "",
         attributes: [{
             name: ATT_ZERO,
             format: "id_metadata",
@@ -46,6 +48,7 @@ const recipe1: RecipeConfiguration = {
     recipe: {
         name: "recipe1",
         title: {},
+        service_endpoint: "",
         attributes: [{
             name: ATT_ONE,
             format: "id_metadata",
@@ -85,14 +88,12 @@ describe("Client-Server Attestation including credential verification", function
         const serverIPv8 = new IPv8Service(serverPeer.ipv8_url);
         const server = new RecipeServer(serverPeer.mid_b64, serverIPv8, recipes);
 
-        const connection = {
-            send: (m: RecipeRequest) => server.executeRecipe(m)
-        }
+        const toServer = (m: RecipeRequest) => server.executeRecipe(m)
 
         const clientIPv8 = new IPv8Service(clientPeer.ipv8_url);
         const verifiee = new OWVerifiee(clientIPv8.verifieeService);
         const attestee = new OWAttestee(clientIPv8.attesteeService);
-        const client = new RecipeClient(clientPeer.mid_b64, verifiee, attestee, connection);
+        const client = new TestRecipeClient(clientPeer.mid_b64, verifiee, attestee, toServer);
 
         serverIPv8.start();
         clientIPv8.start();
@@ -107,3 +108,22 @@ describe("Client-Server Attestation including credential verification", function
     });
 
 });
+
+class TestRecipeClient extends RecipeClient {
+
+    constructor(
+        protected myId: string,
+        protected verifiee: OWVerifiee,
+        protected attestee: OWAttestee,
+        protected toServer: (r: RecipeRequest) => Promise<OWAttestOffer>
+    ) { super(myId, verifiee, attestee); }
+
+    protected sendRequestToServer(recipe: Recipe, request: RecipeRequest): Promise<OWAttestOffer> {
+        return this.toServer(request);
+    }
+
+    protected consentToAttestation() {
+        return Promise.resolve(true);
+    }
+}
+
