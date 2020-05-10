@@ -1,8 +1,11 @@
+import debug from "debug";
 import { IPv8API } from "../api/IPv8API";
 import { IPv8Observer } from "../events/IPv8Observer";
 import { PeerService } from "./PeerService";
 import { AttributeWithHash } from './types/Attribute';
 import { IVerifierService } from './types/IVerifierService';
+
+const log = debug("ow-ssi:ipv8:verifiee");
 
 /**
  * The VerifierService verifies attributes through IPv8.
@@ -13,6 +16,7 @@ export class VerifierService implements IVerifierService {
         private api: IPv8API,
         private observer: IPv8Observer,
         private peerService: PeerService,
+        private verificationThreshold = 0.99999999,
     ) { }
 
     public verify(
@@ -32,17 +36,22 @@ export class VerifierService implements IVerifierService {
         attribute_value: string
     ): Promise<boolean> {
         this.requireIPv8Observer();
-        const threshold = 0.5; // fixme
 
         return new Promise(async (resolve, reject) => {
             try {
                 await this.peerService.findPeer(mid_b64);
 
+                log("Requesting verification", mid_b64, attribute_hash_b64, attribute_value);
                 this.api.requestVerification(mid_b64, attribute_hash_b64, attribute_value);
 
                 this.observer.onVerification((verif) => {
-                    if (verif.attribute_hash === attribute_hash_b64 && verif.probability > threshold) {
-                        resolve(true);
+                    if (verif.attribute_hash === attribute_hash_b64) {
+                        if (verif.probability > this.verificationThreshold) {
+                            resolve(true);
+                        } else if (verif.probability > 0) {
+                            resolve(false);
+                            log(`Non-zero verification output did not pass the threshold of ${this.verificationThreshold}:`, verif)
+                        }
                     }
                 });
             } catch (err) {

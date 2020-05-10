@@ -64,8 +64,8 @@ export class VerifyHttpServer {
 
         const template = req.query.template;
 
-        // Include uuid in request?
-        const url = `http://localhost:${this.port}` // FIXME
+        // TODO Include uuid in request?
+        const url = `${req.protocol}://${req.headers.host}`;
 
         if (template in this.templates) {
             const uuid = this.createUUID(template);
@@ -93,12 +93,13 @@ export class VerifyHttpServer {
         res.setHeader("content-type", "application/json");
 
         const uuid = req.query.uuid;
+        const url = `${req.protocol}://${req.headers.host}`;
 
         if (!(uuid in this.refs)) {
             this.sendInvalidRequest(res, "No such uuid");
         } else {
             const template = this.refs[uuid].template;
-            res.send(this.getVerifyRequest(template)) // include uuid in return_address?
+            res.send(this.getVerifyRequest(template, url)) // TODO include uuid in return_address?
         }
     }
 
@@ -110,13 +111,14 @@ export class VerifyHttpServer {
     protected handleVerifyMe(req: Request, res: Response) {
         res.setHeader("content-type", "application/json");
 
-        const uuid = req.body.uuid; // include uuid in GET?
+        const uuid = req.body.uuid; // TODO include uuid in GET?
         const response = req.body.response;
+        const baseUrl = `${req.protocol}://${req.headers.host}`;
 
         if (!(uuid in this.refs)) {
             this.sendInvalidRequest(res, "No such uuid");
         } else {
-            const result = this.handleVerifyResponse(uuid, response);
+            const result = this.handleVerifyResponse(uuid, response, baseUrl);
             res.send({ success: true })
         }
     }
@@ -143,16 +145,16 @@ export class VerifyHttpServer {
         return id;
     }
 
-    protected getVerifyRequest(template: string): OWVerifyRequest {
+    protected getVerifyRequest(template: string, baseUrl: string): OWVerifyRequest {
         return {
             ...this.templates[template],
-            http_return_address: `http://localhost:${this.port}/verifyMe` // FIXME 
+            http_return_address: `${baseUrl}/verifyMe`
         };
     }
 
-    protected handleVerifyResponse(uuid: string, response: OWVerifyResponse) {
+    protected handleVerifyResponse(uuid: string, response: OWVerifyResponse, baseUrl: string) {
         const process = this.refs[uuid];
-        const req = this.getVerifyRequest(process.template);
+        const req = this.getVerifyRequest(process.template, baseUrl);
 
         if (this.verifier.validateResponse(req, response).length > 0) {
             log("Invalid OWVerifyResponse")

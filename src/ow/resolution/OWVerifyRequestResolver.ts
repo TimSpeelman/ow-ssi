@@ -1,5 +1,9 @@
+import debug from "debug";
 import { OWVerifyReqAttr, OWVerifyRequest, OWVerifyRespAttr, OWVerifyResponse } from "../protocol/types";
 import { IAttributeStore, IVerifyRequestResolver, ResolutionAttributeResult, ResolutionResult } from "./types";
+
+
+const log = debug("ow-ssi:ow:resolver");
 
 /**
  * This Resolver consumes a VerifyRequest and fetches matching attribute
@@ -22,17 +26,20 @@ export class OWVerifyRequestResolver implements IVerifyRequestResolver {
     async resolveRequest(request: OWVerifyRequest): Promise<ResolutionResult> {
         const attributes = await Promise.all(request.attributes.map(a => this.resolveSingle(a)));
         const status = attributes.some(a => a.status !== "success") ? "unresolved" : "success";
+
         const response: OWVerifyResponse = {
             ref: request.ref,
             subject_id: this.myId,
             request_hash: "FIXME",
             attributes: attributes.map(a => a.responses[0]),
         }
-        return {
+        const result: ResolutionResult = {
             status,
             attributes,
             response,
         }
+        log(status === "success" ? "Resolved request" : "Failed to resolve request", result);
+        return result;
     }
 
     async resolveSingle(request: OWVerifyReqAttr): Promise<ResolutionAttributeResult> {
@@ -48,14 +55,16 @@ export class OWVerifyRequestResolver implements IVerifyRequestResolver {
             : results.length === 1 ? "success"
                 : "ambiguous";
 
-        return {
+        const result: ResolutionAttributeResult = {
             ref: request.ref,
             status,
             request: request,
             responses,
             results,
         }
-        // value
+
+        log(status === "success" ? "Resolved attribute" : "Failed to resolve attribute", result);
+        return result;
     }
 
 }
