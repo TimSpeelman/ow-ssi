@@ -51,6 +51,8 @@ export class AttesterService implements IAttesterService {
         if (this.listener) {
             const result = await this.listener(req);
             this.api.attest(req.mid_b64, req.attribute_name, result.attribute_value);
+        } else {
+            console.log("Ignored non-staged attestation request.");
         }
     }
 
@@ -83,7 +85,7 @@ export class AttesterService implements IAttesterService {
     }
 
     protected requireIPv8Observer() {
-        if (!this.observer) {
+        if (!this.observer.isRunning) {
             throw new Error("IPv8 observer is not running");
         }
     }

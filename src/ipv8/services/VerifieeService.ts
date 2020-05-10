@@ -69,8 +69,13 @@ export class VerifieeService implements IVerifieeService {
         }
     }
 
-    protected handleNonStagedRequest(req: InboundVerificationRequest): Promise<boolean> {
-        return this.listener ? this.listener(req) : Promise.resolve(false)
+    protected async handleNonStagedRequest(req: InboundVerificationRequest): Promise<boolean> {
+        if (this.listener) {
+            return this.listener(req);
+        } else {
+            console.log("Ignored non-staged verification request.");
+            return false;
+        }
     }
 
     protected getGrant(mid_b64: string, attribute_name: string): VerificationGrant | null {
@@ -102,7 +107,7 @@ export class VerifieeService implements IVerifieeService {
     }
 
     protected requireIPv8Observer() {
-        if (!this.observer) {
+        if (!this.observer.isRunning) {
             throw new Error("IPv8 observer is not running");
         }
     }

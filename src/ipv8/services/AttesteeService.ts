@@ -55,7 +55,7 @@ export class AttesteeService implements IAttesteeService {
     }
 
     protected requireIPv8Observer() {
-        if (!this.observer) {
+        if (!this.observer.isRunning) {
             throw new Error("IPv8 observer is not running");
         }
     }
