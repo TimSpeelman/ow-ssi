@@ -10,12 +10,12 @@ export const paths: { [k in keyof IVerifyServerAPI]: string } = {
 
 /** We share a typescript interface between front and backend. */
 export interface IVerifyServerAPI {
-    getReference: () => { type: "IntentToVerify", url: string, uuid: string };
-    getVerifyRequest: (template: string) => void;
+    getReference: () => Promise<{ type: "IntentToVerify", url: string, uuid: string }>;
+    getVerifyRequest: (template: string) => Promise<void>;
     verifyMe: (template: string, response: OWVerifyResponse) =>
         Promise<boolean>;
     getResult: (uuid: string) =>
-        VerifyResult;
+        Promise<VerifyResult>;
 }
 
 export interface VerifyResult {

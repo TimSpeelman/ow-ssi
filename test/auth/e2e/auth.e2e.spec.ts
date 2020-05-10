@@ -1,20 +1,20 @@
 import Axios from "axios";
-import fs from "fs";
 import { VerifyHttpClient } from "../../../src/auth/HttpClient";
 import { VerifyHttpServer } from "../../../src/auth/HttpServer";
 import { Attestation } from "../../../src/ipv8/api/types";
 import { IPv8Service } from "../../../src/ipv8/IPv8Service";
-import { OWVerifieeService } from "../../../src/ow/OWVerifieeService";
-import { OWVerifierService } from "../../../src/ow/OWVerifierService";
-import { OWVerifyRequestResolver } from "../../../src/ow/OWVerifyRequestResolver";
-import { OWVerifyRequest } from "../../../src/ow/types";
+import { OWVerifiee } from "../../../src/ow/protocol/OWVerifiee";
+import { OWVerifier } from "../../../src/ow/protocol/OWVerifier";
+import { OWVerifyRequest } from "../../../src/ow/protocol/types";
+import { OWVerifyRequestResolver } from "../../../src/ow/resolution/OWVerifyRequestResolver";
+import { loadTemporaryIPv8Configuration } from "../../../src/util/ipv8conf";
 import { mockRepo } from "../../ow/mockRepo";
 import { before, describe, expect, it } from "../../tools";
 
 const prefix = "ow-authserver-";
 
-const aliceConf = JSON.parse(fs.readFileSync('temp/server-kvk/config.json', { encoding: 'utf8' }))
-const bobConf = JSON.parse(fs.readFileSync('temp/client/config.json', { encoding: 'utf8' }))
+const aliceConf = loadTemporaryIPv8Configuration('test-alice')
+const bobConf = loadTemporaryIPv8Configuration('test-bob')
 
 const config = {
     aliceUrl: `http://localhost:${aliceConf.port}`,
@@ -56,8 +56,8 @@ describe("OWVerifyServer end-to-end", () => {
         login: loginRequest
     }
 
-    const verifiee = new OWVerifieeService(alice.verifieeService);
-    const verifier = new OWVerifierService(bob.verifierService);
+    const verifiee = new OWVerifiee(alice.verifieeService);
+    const verifier = new OWVerifier(bob.verifierService);
 
     const server = new VerifyHttpServer(
         templates,
@@ -103,7 +103,8 @@ describe("OWVerifyServer end-to-end", () => {
         // The web portal receives the result
         const verifyResult = await Axios.get(serverUrl + "/result?uuid=" + refData.uuid).then(res => res.data);
 
-        expect(verifyResult).to.deep.equal({ result: { success: true } });
+        expect(verifyResult).to.have.property("result")
+        expect(verifyResult.result).to.have.property("success", true)
 
     })
 

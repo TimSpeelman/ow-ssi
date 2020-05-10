@@ -40,7 +40,7 @@ export class AttesterService implements IAttesterService {
         const { mid_b64, attribute_name } = req
         const att = this.getGrant(mid_b64, attribute_name)
         if (!att) {
-            this.handleNonStagedRequest(req)
+            await this.handleNonStagedRequest(req)
         } else {
             await this.api.attest(mid_b64, attribute_name, att.attribute.attribute_value)
             this.removeGrant(mid_b64, attribute_name)
@@ -50,7 +50,9 @@ export class AttesterService implements IAttesterService {
     protected async handleNonStagedRequest(req: InboundAttestationRequest): Promise<void> {
         if (this.listener) {
             const result = await this.listener(req);
-            this.api.attest(req.mid_b64, req.attribute_name, result.attribute_value);
+            if (result) {
+                return this.api.attest(req.mid_b64, req.attribute_name, result.attribute_value);
+            }
         } else {
             console.log("Ignored non-staged attestation request.");
         }

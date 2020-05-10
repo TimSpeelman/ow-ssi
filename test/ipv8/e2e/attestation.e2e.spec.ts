@@ -1,9 +1,9 @@
-import fs from "fs";
 import { IPv8Service } from "../../../src/ipv8/IPv8Service";
+import { loadTemporaryIPv8Configuration } from "../../../src/util/ipv8conf";
 import { describe, expect, it } from "../../tools";
 
-const aliceConf = JSON.parse(fs.readFileSync('temp/test-alice/config.json', { encoding: 'utf8' }))
-const chrisConf = JSON.parse(fs.readFileSync('temp/test-bob/config.json', { encoding: 'utf8' }))
+const aliceConf = loadTemporaryIPv8Configuration('test-alice');
+const chrisConf = loadTemporaryIPv8Configuration('test-bob');
 
 const config = {
     aliceUrl: `http://localhost:${aliceConf.port}`,

@@ -1,16 +1,16 @@
-import fs from "fs";
 import { IPv8Service } from "../../../src/ipv8/IPv8Service";
 import { OWVerifyRequestHandler } from "../../../src/ow/OWVerifyRequestHandler";
 import { OWVerifiee } from "../../../src/ow/protocol/OWVerifiee";
 import { OWVerifier } from "../../../src/ow/protocol/OWVerifier";
 import { OWVerifyRequest, OWVerifyResponse } from "../../../src/ow/protocol/types";
 import { OWVerifyRequestResolver } from "../../../src/ow/resolution/OWVerifyRequestResolver";
+import { loadTemporaryIPv8Configuration } from "../../../src/util/ipv8conf";
 import { attest } from "../../ipv8/attest";
 import { before, describe, expect, it } from "../../tools";
 import { mockRepo } from "../mockRepo";
 
-const aliceConf = JSON.parse(fs.readFileSync('temp/test-alice/config.json', { encoding: 'utf8' }))
-const bobConf = JSON.parse(fs.readFileSync('temp/test-bob/config.json', { encoding: 'utf8' }))
+const aliceConf = loadTemporaryIPv8Configuration('test-alice')
+const bobConf = loadTemporaryIPv8Configuration('test-bob')
 
 const config = {
     aliceUrl: `http://localhost:${aliceConf.port}`,
