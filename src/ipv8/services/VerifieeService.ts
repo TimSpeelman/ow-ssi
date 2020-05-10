@@ -1,9 +1,12 @@
+import debug from "debug";
 import { Dict } from '../../types/Dict';
 import { IPv8API } from '../api/IPv8API';
 import { InboundVerificationRequest } from "../api/types";
 import { IPv8Observer } from "../events/IPv8Observer";
 import { PeerService } from "./PeerService";
 import { IVerifieeService, NonStagedRequestCallback } from './types/IVerifieeService';
+
+const log = debug("ow-ssi:ipv8:verifiee");
 
 /**
  * The VerifieeService stages all allowed verifications and
@@ -73,7 +76,7 @@ export class VerifieeService implements IVerifieeService {
         if (this.listener) {
             return this.listener(req);
         } else {
-            console.log("Ignored non-staged verification request.");
+            log("Ignored non-staged verification request:", req);
             return false;
         }
     }

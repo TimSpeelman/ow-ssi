@@ -1,5 +1,6 @@
 import bodyParser from "body-parser";
 import cors from "cors";
+import debug from "debug";
 import express, { Request, Response } from "express";
 import QRCode from "qrcode-svg";
 import uuid from "uuid/v4";
@@ -8,7 +9,7 @@ import { OWVerifyRequest, OWVerifyResponse } from "../ow/protocol/types";
 import { Dict } from "../types/Dict";
 import { paths, VerifyResult } from "./IVerifyServerAPI";
 
-
+const log = debug("ow-ssi:verify-http-server");
 
 interface VerifySession {
     template: string;
@@ -23,7 +24,7 @@ export class VerifyHttpServer {
         private templates: Dict<OWVerifyRequest>,
         private port: number,
         private verifier: OWVerifier,
-        private logger: (...args: any[]) => void = console.log,
+        private logger: (...args: any[]) => void = log,
     ) {
 
     }
@@ -154,20 +155,20 @@ export class VerifyHttpServer {
         const req = this.getVerifyRequest(process.template);
 
         if (this.verifier.validateResponse(req, response).length > 0) {
-            console.log("Invalid OWVerifyResponse")
+            log("Invalid OWVerifyResponse")
             return new Error("Invalid response");
         } else {
-            console.log("Server Verifying")
+            log("Server Verifying")
             this.verifier.verify(req, response)
                 .then((ok) => {
-                    console.log("Verify successful")
+                    log("Verify successful")
                     this.refs[uuid].result = {
                         success: ok,
                         response: ok ? response : undefined,
                     }
                 })
                 .catch((e) => {
-                    console.log("Verify errd")
+                    log("Verify errd")
                     throw e
 
                 });

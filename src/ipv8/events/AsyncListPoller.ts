@@ -1,6 +1,9 @@
+import debug from "debug";
 import { isEqual } from "lodash";
 import { Hook } from "../../util/Hook";
 import { interval, IntervalSubscription } from "../../util/interval";
+
+const log = debug("ow-ssi:ipv8:async-list-poller");
 
 /** Polls some list of items, fires an event every time a new item is found. */
 export class AsyncListPoller<T> {
@@ -22,7 +25,7 @@ export class AsyncListPoller<T> {
         if (this.interval) {
             this.interval.unsubscribe();
         } else {
-            console.log("Poller already stopped");
+            log("Poller already stopped");
         }
     }
 

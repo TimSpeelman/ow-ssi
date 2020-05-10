@@ -1,7 +1,10 @@
+import debug from "debug";
 import { OWVerifiee } from "./protocol/OWVerifiee";
 import { OWVerifyRequest } from "./protocol/types";
 import { OWVerifyRequestResolver } from "./resolution/OWVerifyRequestResolver";
 import { ResolutionResult } from "./resolution/types";
+
+const log = debug("ow-ssi:ow:vreq-handler");
 
 export class OWVerifyRequestHandler {
 
@@ -24,7 +27,7 @@ export class OWVerifyRequestHandler {
     async handleRequest(req: OWVerifyRequest) {
         // Filter out requests that do not have a registered reference (i.e. are not expected)
         if (!this.allowWithoutReference && !this.allowedRefs.find(r => r === req.ref)) {
-            console.log("Ignored request", req.ref)
+            log("Ignored request", req.ref)
             return;
         }
 

@@ -1,6 +1,9 @@
+import debug from "debug";
 import { IPv8API } from '../api/IPv8API';
 import { Attestation, InboundAttestationRequest, InboundVerificationRequest, VerificationOutputPair } from "../api/types";
 import { AsyncListPoller } from "./AsyncListPoller";
+
+const log = debug("ow-ssi:ipv8:observer");
 
 /** Observes the IPv8 API for new information and fires corresponding events */
 export class IPv8Observer {
@@ -34,7 +37,7 @@ export class IPv8Observer {
     }
 
     public start() {
-        console.log("Observer starting");
+        log("Observer starting");
         const ms = this.pollIntervalInMillis;
         this.active = true;
         this.peerPoller.start(ms);
@@ -47,11 +50,11 @@ export class IPv8Observer {
     /** Deactivates */
     public stop() {
         if (this.active) {
-            console.log("Observer stopped");
+            log("Observer stopped");
             this.active = false;
             this.stopPollers();
         } else {
-            console.log("Observer already stopped");
+            log("Observer already stopped");
         }
     }
 
@@ -68,10 +71,10 @@ export class IPv8Observer {
         if (this.active && !this.reconnecting) { // handle this only once
 
             if (this.terminateOnDisconnect) {
-                console.log("IPv8 seems to be offline, terminating.");
+                log("IPv8 seems to be offline, terminating.");
                 this.stopPollers();
             } else {
-                console.log("IPv8 seems to be offline, attempting to reconnect.");
+                log("IPv8 seems to be offline, attempting to reconnect.");
                 this.stopPollers();
                 this.attemptToReconnect();
             }
@@ -85,10 +88,10 @@ export class IPv8Observer {
     protected attemptToReconnect() {
         this.reconnecting = true;
         setTimeout(async () => {
-            console.log("Reconnecting..")
+            log("Reconnecting..")
             if (await this.api.verifyOnline()) {
                 if (this.active) {
-                    console.log("Reconnected to IPv8, polls restarting.");
+                    log("Reconnected to IPv8, polls restarting.");
                     this.start();
                 }
             } else if (this.active) {

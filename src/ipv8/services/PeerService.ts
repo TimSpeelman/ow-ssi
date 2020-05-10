@@ -1,5 +1,8 @@
+import debug from "debug";
 import { IPv8API } from "../api/IPv8API";
 import { IPv8Observer } from "../events/IPv8Observer";
+
+const log = debug("ow-ssi:ipv8:peer-service");
 
 /** Peer Service will find a peer by its id, or throw an error. */
 export class PeerService {
@@ -30,7 +33,7 @@ export class PeerService {
                 resolve(true);
 
             } else { // Otherwise, try finding it.
-                console.log("Trying to find peer", peerId)
+                log("Trying to find peer", peerId)
                 let timer;
 
                 // Once the peer is found, clear the timer and resolve.

@@ -1,11 +1,12 @@
 import axios, { AxiosError } from 'axios';
+import debug from "debug";
 import { b64encode } from '../../util/b64';
 import { b64ToHex } from "../../util/b64ToHex";
 import { toHttpError } from "../../util/HttpError";
 import { queryString } from '../../util/queryString';
 import { Attestation, InboundAttestationRequest, InboundVerificationRequest, Peer, VerificationOutputMap, VerificationOutputPair } from "./types";
 
-const log = console.log;
+const log = debug("ow-ssi:ipv8:api");
 
 /**
  * A client for the IPv8 Attestation API.
@@ -30,7 +31,7 @@ export class IPv8API {
 
     /** Make sure we look for a particular peer */
     public connectPeer(mid_b64: string): Promise<Peer[]> {
-        log("API CALL", this.ipv8_api_url, "ConnectPeer", mid_b64);
+        log("ConnectPeer", this.ipv8_api_url, mid_b64);
 
         if (!mid_b64 || mid_b64.length === 0) {
             throw new Error("Not a valid mid");
@@ -53,7 +54,7 @@ export class IPv8API {
             attribute_name,
             id_format
         }
-        log("API CALL", this.ipv8_api_url, "RequestAttestation", query);
+        log("RequestAttestation", this.ipv8_api_url, query);
 
         return axios
             .post(this.ipv8_api_url + `/attestation?${queryString(query)}`)
@@ -83,7 +84,7 @@ export class IPv8API {
             attribute_name,
             attribute_value: b64encode(attribute_value)
         }
-        log("API CALL", this.ipv8_api_url, "Attest", query);
+        log("Attest", this.ipv8_api_url, query);
 
         return axios
             .post(this.ipv8_api_url + `/attestation?${queryString(query)}`)
@@ -125,7 +126,7 @@ export class IPv8API {
             id_metadata: b64encode(JSON.stringify(id_metadata_obj))
         }
 
-        log("API CALL", this.ipv8_api_url, "RequestVerify", query);
+        log("RequestVerify", this.ipv8_api_url, query);
 
         return axios
             .post(this.ipv8_api_url + `/attestation?${queryString(query)}`, '')
@@ -153,7 +154,7 @@ export class IPv8API {
             attribute_name
         }
 
-        log("API CALL", this.ipv8_api_url, "AllowVerify", query);
+        log("AllowVerify", this.ipv8_api_url, query);
 
         return axios
             .post(this.ipv8_api_url + `/attestation?${queryString(query)}`)

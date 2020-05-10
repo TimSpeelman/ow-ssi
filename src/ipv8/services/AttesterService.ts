@@ -1,9 +1,12 @@
+import debug from "debug"
 import { Dict } from '../../types/Dict'
 import { IPv8API } from "../api/IPv8API"
 import { InboundAttestationRequest } from '../api/types'
 import { IPv8Observer } from "../events/IPv8Observer"
 import { Attribute } from './types/Attribute'
 import { IAttesterService, NonStagedRequestCallback, QueuedAttestation } from './types/IAttesterService'
+
+const log = debug("ow-ssi:ipv8:attester");
 
 /**
  * The AttesterService holds a list of granted attestations.
@@ -54,7 +57,7 @@ export class AttesterService implements IAttesterService {
                 return this.api.attest(req.mid_b64, req.attribute_name, result.attribute_value);
             }
         } else {
-            console.log("Ignored non-staged attestation request.");
+            log("Ignored non-staged attestation request:", req);
         }
     }
 
