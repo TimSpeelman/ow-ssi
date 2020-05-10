@@ -6,6 +6,7 @@ import { passportResolver } from "./resolvers/passport";
 export const BRPRecipes: Dict<RecipeConfiguration> = {
     p_passport_nl: {
         recipe: {
+            service_endpoint: "",
             title: {
                 nl_NL: "Nederlands Paspoort",
             },
@@ -35,6 +36,7 @@ export const BRPRecipes: Dict<RecipeConfiguration> = {
 
     p_bsn: {
         recipe: {
+            service_endpoint: "",
             title: {
                 nl_NL: "Burgerservicenummer",
             },

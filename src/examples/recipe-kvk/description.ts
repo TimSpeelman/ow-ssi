@@ -6,7 +6,6 @@ import { KVKRecipes } from "./recipes";
 export const KVKDescription: RecipeServiceDescriptor = {
     id: "kvk",
     url: `http://localhost:${kvkServerPeer.rest_port}`,
-    recipe_url: `http://localhost:${kvkServerPeer.rest_port}/recipe`,
     logo_url: "https://statisch.ondernemersplein.kvk.nl/includes/downloads/KVK_logo_blauw_tcm106-423787.svg",
     mid_b64: kvkServerPeer.mid_b64,
     title: {

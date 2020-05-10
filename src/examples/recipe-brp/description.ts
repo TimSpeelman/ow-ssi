@@ -6,7 +6,6 @@ import { BRPRecipes } from "./recipes";
 export const BRPDescription: RecipeServiceDescriptor = {
     id: "brp",
     url: `http://localhost:${brpServerPeer.rest_port}`,
-    recipe_url: `http://localhost:${brpServerPeer.rest_port}/recipe`,
     logo_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Logo_rijksoverheid_met_beeldmerk.svg/1200px-Logo_rijksoverheid_met_beeldmerk.svg.png",
     mid_b64: brpServerPeer.mid_b64,
     title: {

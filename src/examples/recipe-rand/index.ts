@@ -20,4 +20,4 @@ const httpServer = new HttpRecipeServer(RandDescription, options.http_port, reci
 
 httpServer.start()
 
-console.log(`Recipe Service "Random Number" running at http://localhost:${options.http_port}/about`)
+console.log(`Recipe Service "Random Number" running at http://localhost:${options.http_port}`)

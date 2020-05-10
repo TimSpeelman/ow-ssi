@@ -20,4 +20,4 @@ const httpServer = new HttpRecipeServer(BRPDescription, options.http_port, recip
 
 httpServer.start()
 
-console.log(`Recipe Service "BRP" running at http://localhost:${options.http_port}/about`)
+console.log(`Recipe Service "BRP" running at http://localhost:${options.http_port}`)

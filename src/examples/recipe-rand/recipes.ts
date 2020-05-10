@@ -6,6 +6,7 @@ export const RandRecipes: Dict<RecipeConfiguration> = {
     rand: {
         recipe: {
             name: "rand",
+            service_endpoint: "",
             title: {
                 nl_NL: "Random Number",
                 en_US: "Random Number",

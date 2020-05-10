@@ -6,7 +6,6 @@ import { RandRecipes } from "./recipes";
 export const RandDescription: RecipeServiceDescriptor = {
     id: "rand",
     url: `http://localhost:${randServerPeer.rest_port}`,
-    recipe_url: `http://localhost:${randServerPeer.rest_port}/recipe`,
     logo_url: "",
     mid_b64: randServerPeer.mid_b64,
     title: {

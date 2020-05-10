@@ -59,7 +59,6 @@ export interface RecipeServiceDescriptor {
     id: string;
     mid_b64: string;
     url: string;
-    recipe_url: string;
     /** Title for each language */
     title: Dict<string>;
     /** Description for each language */

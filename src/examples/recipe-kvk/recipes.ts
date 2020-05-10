@@ -7,6 +7,7 @@ export const KVKRecipes: Dict<RecipeConfiguration> = {
     p_kvknr: {
         recipe: {
             name: "p_kvknr",
+            service_endpoint: "",
             title: {
                 nl_NL: "KVK Nummer",
             },

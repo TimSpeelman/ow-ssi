@@ -1,6 +1,7 @@
 import bodyParser from "body-parser";
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
+import { mapValues } from "../util/mapValues";
 import { Validate } from "../util/validate";
 import { RecipeServer } from "./RecipeServer";
 import { RecipeRequestValidator } from "./syntax-validation";
@@ -36,7 +37,18 @@ export class HttpRecipeServer {
     protected handleGetAbout(req: Request, res: Response) {
         res.setHeader("content-type", "application/json");
 
-        res.send(this.description);
+        // Provide the service endpoint URL based on
+        // the current host.
+        const endpoint = `http://${req.headers.host}/recipe`;
+        const localizedDescription: RecipeServiceDescriptor = {
+            ...this.description,
+            recipes: mapValues(this.description.recipes, (recipe) => ({
+                ...recipe,
+                service_endpoint: endpoint,
+            }))
+        };
+
+        res.send(localizedDescription);
     }
 
     /** Execute a Recipe */
