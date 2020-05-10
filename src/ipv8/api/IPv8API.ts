@@ -5,6 +5,8 @@ import { toHttpError } from "../../util/HttpError";
 import { queryString } from '../../util/queryString';
 import { Attestation, InboundAttestationRequest, InboundVerificationRequest, Peer, VerificationOutputMap, VerificationOutputPair } from "./types";
 
+const log = console.log;
+
 /**
  * A client for the IPv8 Attestation API.
  */
@@ -28,6 +30,8 @@ export class IPv8API {
 
     /** Make sure we look for a particular peer */
     public connectPeer(mid_b64: string): Promise<Peer[]> {
+        log("API CALL", this.ipv8_api_url, "ConnectPeer", mid_b64);
+
         if (!mid_b64 || mid_b64.length === 0) {
             throw new Error("Not a valid mid");
         }
@@ -49,6 +53,8 @@ export class IPv8API {
             attribute_name,
             id_format
         }
+        log("API CALL", this.ipv8_api_url, "RequestAttestation", query);
+
         return axios
             .post(this.ipv8_api_url + `/attestation?${queryString(query)}`)
             .then(res => res.data.success)
@@ -77,6 +83,8 @@ export class IPv8API {
             attribute_name,
             attribute_value: b64encode(attribute_value)
         }
+        log("API CALL", this.ipv8_api_url, "Attest", query);
+
         return axios
             .post(this.ipv8_api_url + `/attestation?${queryString(query)}`)
             .then(res => res.data)
@@ -116,6 +124,9 @@ export class IPv8API {
             id_format,
             id_metadata: b64encode(JSON.stringify(id_metadata_obj))
         }
+
+        log("API CALL", this.ipv8_api_url, "RequestVerify", query);
+
         return axios
             .post(this.ipv8_api_url + `/attestation?${queryString(query)}`, '')
             .then(response => response.data.success)
@@ -141,6 +152,9 @@ export class IPv8API {
             mid: mid_b64,
             attribute_name
         }
+
+        log("API CALL", this.ipv8_api_url, "AllowVerify", query);
+
         return axios
             .post(this.ipv8_api_url + `/attestation?${queryString(query)}`)
             .then(res => res.data.success)

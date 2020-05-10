@@ -38,7 +38,9 @@
         "rand": "ts-node -P ./tsconfig.commonjs.json ./src/examples/recipe-rand/index.ts",
         "dummy": "ts-node -P ./tsconfig.commonjs.json ./src/examples/dummy-wallet/example.ts",
         "auth-service": "ts-node -P ./tsconfig.commonjs.json ./src/examples/auth-service/example.ts",
-        "free-attest": "ts-node -P ./tsconfig.commonjs.json ./src/examples/freeform-attest/example.ts"
+        "free-attest": "ts-node -P ./tsconfig.commonjs.json ./src/examples/freeform-attest/example.ts",
+        "recipe-client": "ts-node -P ./tsconfig.commonjs.json ./src/examples/recipe-client/index.ts",
+        "observer": "ts-node -P ./tsconfig.commonjs.json ./src/examples/observer/index.ts"
     },
     "lint-staged": {
         "{src,test}/**/*.ts": [
@@ -111,6 +113,7 @@
         "mocha": "^6.2.0",
         "prettier": "^1.14.3",
         "prompt": "^1.0.0",
+        "readline": "^1.3.0",
         "replace-in-file": "^3.4.2",
         "rimraf": "^2.6.2",
         "rollup": "^0.67.0",

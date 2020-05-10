@@ -3,18 +3,19 @@ import { OWVerifiee } from "../ow/protocol/OWVerifiee";
 import { AttestedAttr, OWAttestOffer, OWVerifyResponse } from "../ow/protocol/types";
 import { Recipe, RecipeRequest } from "./types";
 
-
-type Connection = {
-    send: (message: any) => Promise<any>
-}
-
 /**
  * Execute an Open Wallet Recipe as client.
  * 
- * Child implementations of this abstract class can specify the protocol/transport
- * of sending a request to the RecipeServer and the logic to consent to attestation.
+ * Given some Recipe and OW:VerifyResponse..
+ * 1. Formulate a RecipeRequest including the VResp.
+ * 2. Send the RecipeRequest to the recipe's service endpoint URL.
+ * 3. Receive an OWAttestOffer.
+ * 4. Determine whether this offer is acceptable (i.e. consent).
+ * 5. Request attestation of the OWAttestOffer.
+ * 
  */
-export abstract class RecipeClient {
+
+export class RecipeClient {
 
     constructor(
         protected myId: string,
@@ -22,40 +23,49 @@ export abstract class RecipeClient {
         protected attestee: OWAttestee,
     ) { }
 
-    async requestRecipe(recipe: Recipe, vResp?: OWVerifyResponse): Promise<AttestedAttr[]> {
-        const request = this.makeRecipeRequest(recipe, vResp);
+    createProcess(recipe: Recipe): RecipeClientProcess {
+        return new RecipeClientProcess(this.myId, this.verifiee, this.attestee, recipe);
+    }
 
-        if (recipe.verify_request) {
+}
+
+export class RecipeClientProcess {
+    constructor(
+        protected myId: string,
+        protected verifiee: OWVerifiee,
+        protected attestee: OWAttestee,
+        protected recipe: Recipe,
+    ) { }
+
+    /** Allow verification. */
+    public allowVerification(vResp?: OWVerifyResponse) { // TODO: does this belong here?
+        if (this.recipe.verify_request) {
             const validUntil = Date.now() + 10000; // FIXME
-            this.verifiee.allowVerification(recipe.verify_request, validUntil);
-        }
-
-        const offer: OWAttestOffer = await this.sendRequestToServer(recipe, request);
-
-        const errors = this.validateOffer(recipe, offer);
-        if (errors.length > 0) {
-            throw new Error("Illegal server offer: " + errors[0]);
-        }
-
-        if (await this.consentToAttestation(recipe, offer)) {
-            return this.attestee.requestAttestationByOffer(offer);
-        } else {
-            return [];
+            return this.verifiee.allowVerification(this.recipe.verify_request, validUntil);
         }
     }
 
-    protected abstract sendRequestToServer(recipe: Recipe, request: RecipeRequest): Promise<OWAttestOffer>
+    /** Generate a RecipeRequest for this recipe, with VerifyResponse if required. */
+    public createRequest(vResp?: OWVerifyResponse): RecipeRequest {
+        if (this.recipe.verify_request && !vResp) {
+            throw new Error("Recipe requires verification, no VerifyResponse provided.");
+        }
+        return {
+            recipe_name: this.recipe.name,
+            subject_id: this.myId,
+            verify_response: vResp,
+        }
+    }
 
-    protected abstract consentToAttestation(recipe: Recipe, offer: OWAttestOffer): Promise<boolean>
-
-    protected validateOffer(recipe: Recipe, offer: OWAttestOffer): string[] {
+    /** Upon receiving an offer, validate it syntactically and semantically (must match the recipe). */
+    public validateOffer(offer: OWAttestOffer): string[] {
         const queue = offer.attributes;
         const syntaxError = this.attestee.validateOffer(offer);
         if (syntaxError) {
             return syntaxError;
         }
         const errors = [];
-        recipe.attributes.forEach(a => {
+        this.recipe.attributes.forEach(a => {
             const i = queue.findIndex(o => o.name === a.name);
             if (i < 0) {
                 errors.push(`Missing attribute ${a.name} in offer.`);
@@ -74,12 +84,9 @@ export abstract class RecipeClient {
         return errors;
     }
 
-    protected makeRecipeRequest(recipe: Recipe, vResp: OWVerifyResponse): RecipeRequest {
-        return {
-            recipe_name: recipe.name,
-            subject_id: this.myId,
-            verify_response: vResp,
-        }
+    /** Request attestatoin based on this offer. */
+    public requestAttestation(offer: OWAttestOffer): Promise<AttestedAttr[]> {
+        return this.attestee.requestAttestationByOffer(offer);
     }
 
 }

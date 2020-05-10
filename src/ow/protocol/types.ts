@@ -22,7 +22,7 @@ export interface OWAttrConstraint { // FIXME
 }
 
 export interface OWVerifyResponse {
-    ref: string;
+    ref?: string;
     subject_id: string;
     request_hash: string;
     attributes: OWVerifyRespAttr[];

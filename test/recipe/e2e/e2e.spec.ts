@@ -1,11 +1,11 @@
 import { IPv8Service } from "../../../src/ipv8/IPv8Service";
 import { OWAttestee } from "../../../src/ow/protocol/OWAttestee";
 import { OWVerifiee } from "../../../src/ow/protocol/OWVerifiee";
-import { OWAttestOffer } from "../../../src/ow/protocol/types";
+import { OWVerifyResponse } from "../../../src/ow/protocol/types";
 import { RecipeClient } from "../../../src/recipe/RecipeClient";
 import { RecipeConfiguration, RecipeServer } from "../../../src/recipe/RecipeServer";
-import { Recipe, RecipeRequest } from "../../../src/recipe/types";
 import { loadTemporaryIPv8Configuration } from "../../../src/util/ipv8conf";
+import { attest } from "../../ipv8/attest";
 import { describe, expect, it } from "../../tools";
 
 
@@ -55,7 +55,7 @@ const recipe1: RecipeConfiguration = {
             title: {},
         }],
         verify_request: {
-            verifier_id: "", // FIXME
+            verifier_id: serverPeer.mid_b64, // FIXME
             attributes: [
                 { name: ATT_ZERO, ref: ATT_ZERO, format: "id_metadata", include_value: true }
             ],
@@ -63,8 +63,8 @@ const recipe1: RecipeConfiguration = {
         }
     },
     resolver: () => Promise.resolve([{
-        attribute_name: ATT_ZERO,
-        attribute_value: ATT_ZERO_VAL, // arr.shift(),
+        attribute_name: ATT_ONE,
+        attribute_value: ATT_ONE_VAL, // arr.shift(),
     }]),
 }
 
@@ -78,28 +78,33 @@ const serverId = {
     mid_b64: serverPeer.mid_b64,
 };
 
-describe("Client-Server Attestation including credential verification", function () {
+describe("Recipe Service Attestation", function () {
 
     let server: RecipeServer;
     let client: RecipeClient;
 
-    it("attests if verification succeeds", async function () {
+    it("attests without verification", async function () {
 
         const serverIPv8 = new IPv8Service(serverPeer.ipv8_url);
         const server = new RecipeServer(serverPeer.mid_b64, serverIPv8, recipes);
 
-        const toServer = (m: RecipeRequest) => server.executeRecipe(m)
-
         const clientIPv8 = new IPv8Service(clientPeer.ipv8_url);
         const verifiee = new OWVerifiee(clientIPv8.verifieeService);
         const attestee = new OWAttestee(clientIPv8.attesteeService);
-        const client = new TestRecipeClient(clientPeer.mid_b64, verifiee, attestee, toServer);
+        const client = new RecipeClient(clientPeer.mid_b64, verifiee, attestee);
 
         serverIPv8.start();
         clientIPv8.start();
-        // await setupAttestationZero(client, server, myAttrs);
 
-        const data = await client.requestRecipe(recipe0.recipe);
+        const process = client.createProcess(recipe0.recipe);
+        const request = process.createRequest();
+
+        const offer = await server.executeRecipe(request);
+
+        const errors = process.validateOffer(offer);
+        expect(errors).to.deep.equal([], "Expected offer to pass validation");
+
+        const data = await process.requestAttestation(offer);
 
         expect(data).to.be.an("array");
         expect(data).to.have.length(1);
@@ -107,23 +112,56 @@ describe("Client-Server Attestation including credential verification", function
         expect(data[0]).to.have.property("value", ATT_ZERO_VAL);
     });
 
+
+    it("attests with verification", async function () {
+
+        const serverIPv8 = new IPv8Service(serverPeer.ipv8_url);
+        const server = new RecipeServer(serverPeer.mid_b64, serverIPv8, recipes);
+
+        const clientIPv8 = new IPv8Service(clientPeer.ipv8_url);
+        const verifiee = new OWVerifiee(clientIPv8.verifieeService);
+        const attestee = new OWAttestee(clientIPv8.attesteeService);
+        const client = new RecipeClient(clientPeer.mid_b64, verifiee, attestee);
+
+        serverIPv8.start();
+        clientIPv8.start();
+
+        // Provide the client with the required attribute
+        const attributes = await attest(
+            serverIPv8.attesterService,
+            clientIPv8.attesteeService,
+            serverPeer.mid_b64,
+            clientPeer.mid_b64,
+            [{ attribute_name: ATT_ZERO, attribute_value: ATT_ZERO_VAL }]
+        );
+
+        // Create the verification response
+        const response: OWVerifyResponse = {
+            attributes: [{ hash: attributes[0].hash, ref: ATT_ZERO, value: attributes[0].value }],
+            request_hash: "",
+            subject_id: clientPeer.mid_b64,
+        }
+
+        const process = client.createProcess(recipe1.recipe);
+
+        // Create the RecipeRequest, passing the VerifyResponse
+        const request = process.createRequest(response);
+
+        process.allowVerification(response).catch(console.log);
+
+        const offer = await server.executeRecipe(request);
+
+        const errors = process.validateOffer(offer);
+        expect(errors).to.deep.equal([], "Expected offer to pass validation");
+
+        const data = await process.requestAttestation(offer);
+
+        expect(data).to.be.an("array");
+        expect(data).to.have.length(1);
+        expect(data[0]).to.deep.property("name", ATT_ONE);
+        expect(data[0]).to.have.property("value", ATT_ONE_VAL);
+    });
+
+
 });
-
-class TestRecipeClient extends RecipeClient {
-
-    constructor(
-        protected myId: string,
-        protected verifiee: OWVerifiee,
-        protected attestee: OWAttestee,
-        protected toServer: (r: RecipeRequest) => Promise<OWAttestOffer>
-    ) { super(myId, verifiee, attestee); }
-
-    protected sendRequestToServer(recipe: Recipe, request: RecipeRequest): Promise<OWAttestOffer> {
-        return this.toServer(request);
-    }
-
-    protected consentToAttestation() {
-        return Promise.resolve(true);
-    }
-}
 

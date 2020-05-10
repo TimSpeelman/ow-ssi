@@ -34,7 +34,7 @@ export const OWVerifyRespAttrValidator = many([
 
 export const OWVerifyResponseValidator = many([
     object,
-    atKey("ref", string),
+    atKey("ref", optional(string)),
     atKey("subject_id", string),
     atKey("request_hash", string),
     atKey("attributes", arrayWithEach(OWVerifyRespAttrValidator)),

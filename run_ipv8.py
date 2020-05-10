@@ -32,6 +32,7 @@ names = [
     'kvk',
     'brp',
     'rand',
+    'recipe-client',
     'test-alice',
     'test-bob',
     ]

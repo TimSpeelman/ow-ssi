@@ -52,7 +52,7 @@ export class VerifierService implements IVerifierService {
     }
 
     protected requireIPv8Observer() {
-        if (!this.observer) {
+        if (!this.observer.isRunning) {
             throw new Error("IPv8 observer is not running");
         }
     }

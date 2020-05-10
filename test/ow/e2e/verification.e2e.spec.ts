@@ -9,8 +9,6 @@ import { attest } from "../../ipv8/attest";
 import { before, describe, expect, it } from "../../tools";
 import { mockRepo } from "../mockRepo";
 
-const prefix = "ow-verif-";
-
 const aliceConf = JSON.parse(fs.readFileSync('temp/test-alice/config.json', { encoding: 'utf8' }))
 const bobConf = JSON.parse(fs.readFileSync('temp/test-bob/config.json', { encoding: 'utf8' }))
 
@@ -91,10 +89,10 @@ describe("OWVerification end-to-end", () => {
         const alicesHandler = new OWVerifyRequestHandler(alicesResolver, verifiee);
 
         // Alice consents to everything
-        let response;
+        let vResponse;
         alicesHandler.setConsentCallback(async (result) => {
-            response = result.response;
-            expect(!!response).to.equal(true, "Expected a response to be generated");
+            vResponse = result.response;
+            expect(!!vResponse).to.equal(true, "Expected a response to be generated");
             expect(result.status).to.equal("success", "Expected request to be resolved successfully");
             return true;
         })
@@ -110,11 +108,11 @@ describe("OWVerification end-to-end", () => {
         // Alice sends <OW:VerifyResponse> to Bob (via some transport)
 
         // Bob validates the response
-        const errors = verifier.validateResponse(vReq1, response);
+        const errors = verifier.validateResponse(vReq1, vResponse);
         expect(errors).to.deep.equal([], "Expected response validation to pass");
 
         // Bob requests verification
-        const verification = await verifier.verify(vReq1, response);
+        const verification = await verifier.verify(vReq1, vResponse);
 
         expect(verification).to.equal(true);
     })
