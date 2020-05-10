@@ -35,16 +35,24 @@ export class AttesterService implements IAttesterService {
     /** Attest to a peer some attributes within a certain time */
     public stageAttestation(mid_b64: string, attributes: Attribute[], validUntil: number): void {
         this.requireIPv8Observer();
+        log("Staging attestation", { mid_b64, attributes, validUntil });
+
         attributes.forEach(attribute => this.putGrant(mid_b64, { attribute, validUntil }))
     }
 
     /** Check for a valid attestation in the queue, then attest and remove it. */
     protected async onAttestationRequest(req: InboundAttestationRequest): Promise<any> {
         const { mid_b64, attribute_name } = req
+        log("Handling attestation request", req)
+
         const att = this.getGrant(mid_b64, attribute_name)
         if (!att) {
+            log("Attestation request is not staged");
+
             await this.handleNonStagedRequest(req)
         } else {
+            log("Attestation request was staged, attesting..");
+
             await this.api.attest(mid_b64, attribute_name, att.attribute.attribute_value)
             this.removeGrant(mid_b64, attribute_name)
         }

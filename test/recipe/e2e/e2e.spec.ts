@@ -80,21 +80,26 @@ const serverId = {
 
 describe("Recipe Service Attestation", function () {
 
-    let server: RecipeServer;
-    let client: RecipeClient;
+    let serverIPv8: IPv8Service;
+    let clientIPv8: IPv8Service;
+
+    this.beforeEach(() => {
+        serverIPv8 = new IPv8Service(serverPeer.ipv8_url).start();
+        clientIPv8 = new IPv8Service(clientPeer.ipv8_url).start();
+    })
+
+    this.afterEach(() => {
+        serverIPv8.stop();
+        clientIPv8.stop();
+    })
 
     it("attests without verification", async function () {
 
-        const serverIPv8 = new IPv8Service(serverPeer.ipv8_url);
         const server = new RecipeServer(serverPeer.mid_b64, serverIPv8, recipes);
 
-        const clientIPv8 = new IPv8Service(clientPeer.ipv8_url);
         const verifiee = new OWVerifiee(clientIPv8.verifieeService);
         const attestee = new OWAttestee(clientIPv8.attesteeService);
         const client = new RecipeClient(clientPeer.mid_b64, verifiee, attestee);
-
-        serverIPv8.start();
-        clientIPv8.start();
 
         const process = client.createProcess(recipe0.recipe);
         const request = process.createRequest();
@@ -115,16 +120,11 @@ describe("Recipe Service Attestation", function () {
 
     it("attests with verification", async function () {
 
-        const serverIPv8 = new IPv8Service(serverPeer.ipv8_url);
         const server = new RecipeServer(serverPeer.mid_b64, serverIPv8, recipes);
 
-        const clientIPv8 = new IPv8Service(clientPeer.ipv8_url);
         const verifiee = new OWVerifiee(clientIPv8.verifieeService);
         const attestee = new OWAttestee(clientIPv8.attesteeService);
         const client = new RecipeClient(clientPeer.mid_b64, verifiee, attestee);
-
-        serverIPv8.start();
-        clientIPv8.start();
 
         // Provide the client with the required attribute
         const attributes = await attest(

@@ -36,10 +36,12 @@ export class IPv8Service {
 
     start() {
         this.observer.start();
+        return this;
     }
 
     stop() {
         this.observer.stop();
+        return this;
     }
 
 }

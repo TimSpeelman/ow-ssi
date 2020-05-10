@@ -38,6 +38,8 @@ export class VerifieeService implements IVerifieeService {
         validUntil: number
     ): Promise<any> {
         this.requireIPv8Observer();
+        log("Staging verification", { mid_b64, attribute_names, validUntil });
+
         return Promise.all(attribute_names.map(attr => this.stageSingle(mid_b64, attr, validUntil)))
     }
 
@@ -55,8 +57,11 @@ export class VerifieeService implements IVerifieeService {
     /** Check for a valid attestation in the queue, then attest and remove it. */
     protected async onVerificationRequest(req: InboundVerificationRequest): Promise<any> {
         const { mid_b64, attribute_name } = req
+        log("Handling verification request", req)
         const att = this.getGrant(mid_b64, attribute_name)
         if (!att) {
+            log("Verification request is not staged");
+
             const ok = await this.handleNonStagedRequest(req)
             if (!ok) {
                 return false
@@ -65,6 +70,8 @@ export class VerifieeService implements IVerifieeService {
                 await this.api.allowVerify(mid_b64, attribute_name)
             }
         } else {
+            log("Verification request was staged, allowing..");
+
             await this.peerService.findPeer(mid_b64)
             await this.api.allowVerify(mid_b64, attribute_name)
             att.callback()
