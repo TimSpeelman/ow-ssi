@@ -72,7 +72,7 @@ for i in indices:
 
     data = {
         'port': 14410 + i,
-        'mid_b64': b64encode(ipv8.keys["anonymous id"].mid),
+        'mid_b64': b64encode(ipv8.keys["anonymous id"].mid).decode('utf-8'),
     }
 
     with open('temp/' + name + '/config.json', 'w') as outfile:
