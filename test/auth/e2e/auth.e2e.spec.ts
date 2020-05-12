@@ -82,26 +82,21 @@ describe("OWVerifyServer end-to-end", () => {
         const alicesResolver = new OWVerifyRequestResolver(config.aliceMid, repo);
 
         // Alice scans a QR from a portal
-        const ref = await Axios.get(serverUrl + "/referToVerifyRequest?template=login").then(res => res.data);
-        const refData = ref.data;
+        const ref = await Axios.post(serverUrl + "/new-session?template=login").then(res => res.data);
 
         // The Wallet retrieves the request
-        const request = await client.getVerifyRequest(refData.url + "/getVerifyRequest?uuid=" + refData.uuid); // todo: put uuid in url
+        const request = await client.getVerifyRequest(ref.redirectURL);
 
         // Alice handles the request
         const resolveResult = await alicesResolver.resolveRequest(request);
 
-        // Allow verification and submit response
-        // const validUntil = Date.now() + 10000
-        // verifiee.allowVerification(request, validUntil);
-
         // Verification should complete
-        await client.verifyMe(refData.uuid, request, resolveResult.response);
+        await client.verifyMe(request, resolveResult.response);
 
         await new Promise((r) => setTimeout(r, 2000));
 
         // The web portal receives the result
-        const verifyResult = await Axios.get(serverUrl + "/result?uuid=" + refData.uuid).then(res => res.data);
+        const verifyResult = await Axios.get(ref.resultURL).then(res => res.data);
 
         expect(verifyResult).to.have.property("result")
         expect(verifyResult.result).to.have.property("success", true)

@@ -47,12 +47,12 @@ ipv8service.start();
 const nameRequest: OWVerifyRequest = {
     ref: "abc",
     verifier_id: ipv8Config.mid_b64,
-    attributes: [{ ref: "x", name: "name", format: "id_metadata", include_value: true },],
+    attributes: [{ ref: "thename", name: "name", format: "id_metadata", include_value: true },],
 };
 const ageRequest: OWVerifyRequest = {
     ref: "abc",
     verifier_id: ipv8Config.mid_b64,
-    attributes: [{ ref: "x", name: "age", format: "id_metadata", include_value: true },],
+    attributes: [{ ref: "theage", name: "age", format: "id_metadata", include_value: true },],
 };
 
 const templates = {

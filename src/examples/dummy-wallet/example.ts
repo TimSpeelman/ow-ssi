@@ -72,7 +72,7 @@ class DummyWallet {
 
         try {
             const authClient = new VerifyHttpClient(this.verifiee);
-            const request = await authClient.getVerifyRequest(intent.url + "/getVerifyRequest?uuid=" + intent.uuid);
+            const request = await authClient.getVerifyRequest(intent.url);
 
             console.log("Received OW:VerifyRequest: ", request)
 
@@ -87,7 +87,7 @@ class DummyWallet {
             }
 
             // Verification should complete
-            await authClient.verifyMe(intent.uuid, request, resolveResult.response);
+            await authClient.verifyMe(request, resolveResult.response);
 
             res.send(true);
 

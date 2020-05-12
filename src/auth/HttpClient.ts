@@ -9,18 +9,17 @@ export class VerifyHttpClient {
     ) { }
 
     getVerifyRequest(url: string): Promise<OWVerifyRequest> {
-        return Axios.get(url).then(res => res.data).catch((e) => {
+        return Axios.post(url).then(res => res.data).catch((e) => {
             console.error("Could not get VerifyRequest");
             throw e;
         });
     }
 
-    verifyMe(uuid: string, request: OWVerifyRequest, response: OWVerifyResponse) {
+    verifyMe(request: OWVerifyRequest, response: OWVerifyResponse) {
         const validUntil = Date.now() + 10000;
 
         const verifResult = this.verifieeService.allowVerification(request, validUntil);
         const submitResult = Axios.post(request.http_return_address, {
-            uuid,
             response,
         }).then(res => res.data).catch((e) => {
             console.error("Could not submit VerifyResponse");

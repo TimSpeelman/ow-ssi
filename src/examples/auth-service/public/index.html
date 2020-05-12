@@ -35,70 +35,16 @@
         const authServer = "http://localhost:8000";
         const dummyWallet = "http://localhost:5000";
 
-        function createVerifyIntent(template) {
-            return new Promise(function (resolve) {
-                const xhr = new XMLHttpRequest();
-                xhr.open("GET", authServer + "/referToVerifyRequest?template=" + template);
-                xhr.onload = function () {
-                    const resp = xhr.response;
-                    const data = JSON.parse(resp);
-                    resolve(data);
-                }
-                xhr.send();
-            })
+        function onVerifyName(result) {
+            document.getElementById("qr-name").innerHTML = "<strong style='color:green'>Hello, " + result.response.attributes[0].value + "</strong>";
         }
 
-        function awaitVerifyStatus(uuid) {
-            const pollIntervalInMillis = 500;
-            return new Promise(function (resolve) {
-                let done = false;
-
-                let interval = setInterval(function () {
-
-                    if (done) {
-                        clearInterval(interval);
-                        return;
-                    }
-
-                    const xhr = new XMLHttpRequest();
-                    xhr.open("GET", authServer + "/result?uuid=" + uuid);
-                    xhr.onload = function () {
-                        const resp = xhr.response;
-                        const data = JSON.parse(resp);
-                        if (data.result) {
-                            done = true;
-                            resolve(data.result);
-                        }
-                    }
-                    xhr.send();
-
-                }, pollIntervalInMillis)
-            })
+        function onVerifyAge(result) {
+            document.getElementById("qr-age").innerHTML = "<strong style='color:green'>You are " + result.response.attributes[0].value + " years old.</strong>";
         }
-
-        const qrs = {};
-
-        createVerifyIntent("name").then(function (data) {
-            document.getElementById("qr-name").innerHTML = data.qr;
-            qrs["name"] = JSON.stringify(data.data);
-
-            awaitVerifyStatus(data.data.uuid).then((result) => {
-                document.getElementById("qr-name").innerHTML = "Hello, " + result.response.attributes[0].value;
-            })
-        })
-
-        createVerifyIntent("age").then(function (data) {
-            document.getElementById("qr-age").innerHTML = data.qr;
-            qrs["age"] = JSON.stringify(data.data);
-
-            awaitVerifyStatus(data.data.uuid).then((result) => {
-                document.getElementById("qr-age").innerHTML = "You are " + result.response.attributes[0].value + " years old.";
-            })
-        })
-
 
         function mockScan(variant) {
-            const qrString = qrs[variant];
+            const qrString = document.getElementById("qr-" + variant).getAttribute("data");
             return new Promise(function (resolve) {
                 const xhr = new XMLHttpRequest();
                 xhr.open("GET", dummyWallet + "/scan?qr=" + qrString);
@@ -110,6 +56,11 @@
         }
 
     </script>
+
+    <script src="http://localhost:8000/client.js"></script>
+    <script>OWVerifyService.verifyByQR("name", onVerifyName, "qr-name")</script>
+    <script>OWVerifyService.verifyByQR("age", onVerifyAge, "qr-age")</script>
+
 </body>
 
 </html>

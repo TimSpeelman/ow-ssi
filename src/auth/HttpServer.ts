@@ -2,7 +2,8 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import debug from "debug";
 import express, { Request, Response } from "express";
-import QRCode from "qrcode-svg";
+import fs from "fs";
+import path from "path";
 import uuid from "uuid/v4";
 import { OWVerifier } from "../ow/protocol/OWVerifier";
 import { OWVerifyRequest, OWVerifyResponse } from "../ow/protocol/types";
@@ -42,15 +43,23 @@ export class VerifyHttpServer {
         app.use(bodyParser.json({ type: "application/json" }));
         app.use(cors());
 
-        app.get(paths.getReference, this.handleGetReference.bind(this));
-        app.get(paths.getVerifyRequest, this.handleGetVerifyRequest.bind(this));
+        app.post(paths.newSession, this.handleGetReference.bind(this));
+        app.post(paths.getRequest, this.handleGetVerifyRequest.bind(this));
         app.post(paths.verifyMe, this.handleVerifyMe.bind(this));
         app.get(paths.getResult, this.handleGetResult.bind(this));
+        app.get("/client.js", this.serveScript.bind(this));
 
         app.use(this.handleError.bind(this));
 
         this.logger(`Listening at port ${this.port}.`);
         app.listen(this.port);
+    }
+
+    protected serveScript(req: Request, res: Response) {
+        res.set('Content-Type', 'text/javascript')
+        const js = fs.readFileSync(path.join(__dirname, "client.js"), { encoding: "utf8" });
+        const initURL = `${req.protocol}://${req.headers.host}${paths.newSession}`;
+        res.send(js.replace("%INITURL%", initURL));
     }
 
     /**
@@ -69,17 +78,10 @@ export class VerifyHttpServer {
 
         if (template in this.templates) {
             const uuid = this.createUUID(template);
-            const data = { type: "IntentToVerify", uuid, url }
-            const qr = new QRCode({
-                content: JSON.stringify(data),
-                width: 256,
-                height: 256,
-                color: "#000000",
-                background: "#ffffff",
-                ecl: "M",
-            }).svg();
+            const redirectURL = `${url}${paths.getRequest}?uuid=${uuid}`;
+            const resultURL = `${url}${paths.getResult}?uuid=${uuid}`;
 
-            res.send({ data, qr })
+            res.send({ resultURL, redirectURL })
         } else {
             this.sendInvalidRequest(res, "No such template");
         }
@@ -93,13 +95,13 @@ export class VerifyHttpServer {
         res.setHeader("content-type", "application/json");
 
         const uuid = req.query.uuid;
-        const url = `${req.protocol}://${req.headers.host}`;
+        const response_url = `${req.protocol}://${req.headers.host}${paths.verifyMe}?uuid=${uuid}`;
 
         if (!(uuid in this.refs)) {
             this.sendInvalidRequest(res, "No such uuid");
         } else {
             const template = this.refs[uuid].template;
-            res.send(this.getVerifyRequest(template, url)) // TODO include uuid in return_address?
+            res.send(this.makeVerifyRequest(template, response_url)) // TODO include uuid in return_address?
         }
     }
 
@@ -111,7 +113,7 @@ export class VerifyHttpServer {
     protected handleVerifyMe(req: Request, res: Response) {
         res.setHeader("content-type", "application/json");
 
-        const uuid = req.body.uuid; // TODO include uuid in GET?
+        const uuid = req.query.uuid; // TODO include uuid in GET?
         const response = req.body.response;
         const baseUrl = `${req.protocol}://${req.headers.host}`;
 
@@ -145,16 +147,16 @@ export class VerifyHttpServer {
         return id;
     }
 
-    protected getVerifyRequest(template: string, baseUrl: string): OWVerifyRequest {
+    protected makeVerifyRequest(template: string, responseUrl: string): OWVerifyRequest {
         return {
             ...this.templates[template],
-            http_return_address: `${baseUrl}/verifyMe`
+            http_return_address: responseUrl
         };
     }
 
     protected handleVerifyResponse(uuid: string, response: OWVerifyResponse, baseUrl: string) {
         const process = this.refs[uuid];
-        const req = this.getVerifyRequest(process.template, baseUrl);
+        const req = this.makeVerifyRequest(process.template, baseUrl);
 
         if (this.verifier.validateResponse(req, response).length > 0) {
             log("Invalid OWVerifyResponse")
