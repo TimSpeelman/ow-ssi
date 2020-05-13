@@ -1,7 +1,11 @@
 import Axios from "axios";
-import { IPv8Service } from "../../ipv8";
-import { OWAttestee, OWAttributeRepository, OWVerifiee, OWVerifyRequestResolver } from "../../ow";
-import { Recipe, RecipeClient, RecipeServiceDescriptor } from "../../recipe";
+import { IPv8Service } from "../../ipv8/IPv8Service";
+import { OWAttributeRepository } from "../../ow/OWAttributeRepository";
+import { OWAttestee } from "../../ow/protocol/OWAttestee";
+import { OWVerifiee } from "../../ow/protocol/OWVerifiee";
+import { OWVerifyRequestResolver } from "../../ow/resolution/OWVerifyRequestResolver";
+import { RecipeClient } from "../../recipe/RecipeClient";
+import { Recipe, RecipeServiceDescriptor } from "../../recipe/types";
 import { Dict } from "../../types/Dict";
 import { CommandLineInterface } from "../../util/CommandLineInterface";
 import { loadTemporaryIPv8Configuration } from "../../util/ipv8conf";

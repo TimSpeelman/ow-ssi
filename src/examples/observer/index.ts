@@ -1,4 +1,5 @@
-import { IPv8API, IPv8Observer } from "../../ipv8";
+import { IPv8API } from "../../ipv8/api/IPv8API";
+import { IPv8Observer } from "../../ipv8/events/IPv8Observer";
 import { CommandLineInterface } from "../../util/CommandLineInterface";
 
 

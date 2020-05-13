@@ -1,5 +1,7 @@
 import Axios from "axios";
-import { OWAttestee, OWAttestOffer, OWVerifiee } from "../ow";
+import { OWAttestee } from "../ow/protocol/OWAttestee";
+import { OWVerifiee } from "../ow/protocol/OWVerifiee";
+import { OWAttestOffer } from "../ow/protocol/types";
 import { RecipeClient } from "./RecipeClient";
 import { Recipe, RecipeRequest } from "./types";
 
