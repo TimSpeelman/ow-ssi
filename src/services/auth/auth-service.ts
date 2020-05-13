@@ -20,13 +20,13 @@ const argv = yargs
         alias: 'i',
         description: 'The port on which the IPv8 instance runs',
         type: 'number',
-        default: 8123,
+        default: 8080,
     })
     .option('config', {
         alias: 'c',
         description: 'The path to the JSON configuration file',
         type: 'string',
-        default: "./data/config.json",
+        default: "data/config.json",
     })
     .help()
     .alias('help', 'h')
