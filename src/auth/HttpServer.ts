@@ -5,6 +5,7 @@ import express, { Request, Response } from "express";
 import fs from "fs";
 import path from "path";
 import uuid from "uuid/v4";
+import { IPv8Service } from "../ipv8/IPv8Service";
 import { OWVerifier } from "../ow/protocol/OWVerifier";
 import { OWVerifyRequest, OWVerifyResponse } from "../ow/protocol/types";
 import { Dict } from "../types/Dict";
@@ -25,6 +26,7 @@ export class VerifyHttpServer {
         private templates: Dict<OWVerifyRequest>,
         private port: number,
         private verifier: OWVerifier,
+        private ipv8: IPv8Service,
         private logger: (...args: any[]) => void = log,
     ) {
 
@@ -91,7 +93,7 @@ export class VerifyHttpServer {
      * The Wallet will call this endpoint to retrieve the 
      * OWVerifyRequest that belongs to the UUID it has received.
      */
-    protected handleGetVerifyRequest(req: Request, res: Response) {
+    protected async handleGetVerifyRequest(req: Request, res: Response) {
         res.setHeader("content-type", "application/json");
 
         const uuid = req.query.uuid;
@@ -101,7 +103,7 @@ export class VerifyHttpServer {
             this.sendInvalidRequest(res, "No such uuid");
         } else {
             const template = this.refs[uuid].template;
-            res.send(this.makeVerifyRequest(template, response_url)) // TODO include uuid in return_address?
+            res.send(await this.makeVerifyRequest(template, response_url)) // TODO include uuid in return_address?
         }
     }
 
@@ -147,16 +149,17 @@ export class VerifyHttpServer {
         return id;
     }
 
-    protected makeVerifyRequest(template: string, responseUrl: string): OWVerifyRequest {
+    protected async makeVerifyRequest(template: string, responseUrl: string): Promise<OWVerifyRequest> {
         return {
             ...this.templates[template],
+            verifier_id: await this.getMyId(),
             http_return_address: responseUrl
         };
     }
 
-    protected handleVerifyResponse(uuid: string, response: OWVerifyResponse, baseUrl: string) {
+    protected async handleVerifyResponse(uuid: string, response: OWVerifyResponse, baseUrl: string) {
         const process = this.refs[uuid];
-        const req = this.makeVerifyRequest(process.template, baseUrl);
+        const req = await this.makeVerifyRequest(process.template, baseUrl);
 
         if (this.verifier.validateResponse(req, response).length > 0) {
             log("Invalid OWVerifyResponse")
@@ -197,5 +200,9 @@ export class VerifyHttpServer {
                 name: err.name,
             }
         })
+    }
+
+    protected getMyId() {
+        return this.ipv8.api.getMyId();
     }
 }

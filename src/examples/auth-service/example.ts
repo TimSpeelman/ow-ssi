@@ -65,7 +65,8 @@ const verifier = new OWVerifier(ipv8service.verifierService);
 const server = new VerifyHttpServer(
     templates,
     config.serverPort,
-    verifier
+    verifier,
+    ipv8service
 );
 
 server.start();

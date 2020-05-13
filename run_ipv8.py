@@ -33,7 +33,7 @@ names = [
 
 class MyService(object):
 
-    first_port = 14410
+    first_port = 13310
 
     def __init__(self):
         """
@@ -100,9 +100,13 @@ class MyService(object):
                 'file': u"%s/ec.pem" % (workdir)
             }
         ]
+        
+        # Only load the basic communities
+        # requested_overlays = ['DiscoveryCommunity', 'AttestationCommunity', 'IdentityCommunity']
+        # configuration['overlays'] = [o for o in configuration['overlays'] if o['class'] in requested_overlays]
 
         # Provide the working directory to its overlays
-        working_directory_overlays = ['AttestationCommunity', 'IdentityCommunity']
+        working_directory_overlays = ['AttestationCommunity', 'IdentityCommunity', 'TrustChainCommunity']
         for overlay in configuration['overlays']:
             if overlay['class'] in working_directory_overlays:
                 overlay['initialize'] = {'working_directory': workdir}
@@ -127,6 +131,7 @@ class MyService(object):
 
         with open('%s/config.json' % workdir, 'w') as outfile:
             json.dump(data, outfile)
+            outfile.close()
 
         # Start its API
         api = RESTManager(ipv8)

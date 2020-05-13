@@ -14,6 +14,14 @@ const log = debug("ow-ssi:ipv8:api");
 export class IPv8API {
     constructor(private ipv8_api_url: string) { }
 
+    /** Get my Member ID */
+    public getMyId(): Promise<string> {
+        return axios
+            .get(this.ipv8_api_url + '/me')
+            .then(res => res.data.mid)
+            .catch(this.handleError.bind(this))
+    }
+
     /** Check that this IPv8 instance is online */
     public verifyOnline(): Promise<boolean> {
         return this.listPeers()

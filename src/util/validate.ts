@@ -33,7 +33,18 @@ const V = {
     atKey: (key: string, validate: Validator) => (d: any) => {
         const error = validate(d[key])
         return error ? `At key '${key}': ${error}` : false
-    }
+    },
+    objectWithEach: (validate: Validator) => V.many([
+        V.object,
+        (d: any): string | false => {
+            const keys = Object.keys(d);
+            return keys.reduce((err, key) => {
+                if (err) return err;
+                const e = validate(d[key]);
+                return e ? `At key '${key}': ${e}` : false;
+            }, false);
+        }
+    ])
 }
 
 export const Validate = V

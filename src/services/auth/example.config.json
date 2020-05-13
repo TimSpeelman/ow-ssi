@@ -1,0 +1,15 @@
+{
+    "server_port": 9123,
+    "templates": {
+        "age": {
+            "attributes": [
+                {
+                    "ref": "theage",
+                    "name": "age",
+                    "format": "id_metadata",
+                    "include_value": true
+                }
+            ]
+        }
+    }
+}

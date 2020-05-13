@@ -62,7 +62,8 @@ describe("OWVerifyServer end-to-end", () => {
     const server = new VerifyHttpServer(
         templates,
         config.serverPort,
-        verifier
+        verifier,
+        bob,
     );
     const serverUrl = `http://localhost:${config.serverPort}`;
 

@@ -23,7 +23,7 @@
         "prebuild": "rimraf dist",
         "build": "tsc --module commonjs && rollup -c rollup.config.ts",
         "start": "rollup -c rollup.config.ts -w",
-        "test": "mocha --require ts-node/register --timeout 10000 ./test/**/*.ts",
+        "test": "mocha --timeout 10000 --require ts-node/register ./test/**/*.ts",
         "test:watch": "jest --coverage --watch",
         "test:prod": "npm run lint && npm run test -- --no-cache",
         "deploy-docs": "ts-node tools/gh-pages-publish",
@@ -40,7 +40,8 @@
         "auth-service": "ts-node -P ./tsconfig.commonjs.json ./src/examples/auth-service/example.ts",
         "free-attest": "ts-node -P ./tsconfig.commonjs.json ./src/examples/freeform-attest/example.ts",
         "recipe-client": "ts-node -P ./tsconfig.commonjs.json ./src/examples/recipe-client/index.ts",
-        "observer": "ts-node -P ./tsconfig.commonjs.json ./src/examples/observer/index.ts"
+        "observer": "ts-node -P ./tsconfig.commonjs.json ./src/examples/observer/index.ts",
+        "service:auth": "ts-node -P ./tsconfig.commonjs.json ./src/services/auth/auth-service.ts"
     },
     "lint-staged": {
         "{src,test}/**/*.ts": [
@@ -137,6 +138,7 @@
         "@types/qrcode-svg": "^1.1.0"
     },
     "dependencies": {
+        "@types/yargs": "^15.0.4",
         "atob": "^2.1.2",
         "axios": "^0.19.0",
         "body-parser": "^1.19.0",
@@ -146,7 +148,8 @@
         "express": "^4.17.1",
         "lodash": "^4.17.15",
         "qrcode-svg": "^1.1.0",
-        "uuid": "^3.3.2"
+        "uuid": "^3.3.2",
+        "yargs": "^15.3.1"
     },
     "publishConfig": {
         "access": "public"
