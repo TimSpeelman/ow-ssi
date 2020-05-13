@@ -1,30 +1,16 @@
 import json
 import os
 import shutil
+import signal
+import sys
+
+from asyncio import all_tasks, ensure_future, gather, get_event_loop, sleep
 from base64 import b64encode
-from binascii import hexlify
+from pyipv8.ipv8_service import IPv8
+from pyipv8.ipv8.configuration import get_default_configuration
+from pyipv8.ipv8.REST.rest_manager import RESTManager
 
-from twisted.internet import reactor
-
-from ipv8.configuration import get_default_configuration
-from ipv8.REST.rest_manager import RESTManager
-from ipv8_service import IPv8
-
-data = {}
-
-# Launch IPv8 services.
-# We run REST endpoints for these services on:
-#  - http://localhost:14411/
-#  - http://localhost:14412/
-#  - ...
-# This script also prints the peer ids for reference with:
-#  - http://localhost:1441*/attestation?type=peers
-
-if os.path.exists("temp"):
-    shutil.rmtree("temp")
-
-os.mkdir("temp")
-
+tempdir = "temp"
 names = [
     'auth-service',
     'dummy-wallet',
@@ -35,47 +21,138 @@ names = [
     'recipe-client',
     'test-alice',
     'test-bob',
-    ]
-indices = range(len(names))
-for i in indices:
-    name = names[i]
-    os.mkdir("temp/" + name)
-    configuration = get_default_configuration()
-    configuration['logger']['level'] = "ERROR"
-    configuration['keys'] = [
-        {'alias': "anonymous id", 'generation': u"curve25519",
-            'file': u"temp/" + name + "/multichain.pem"},
-        {'alias': "my peer", 'generation': u"medium",
-            'file': u"temp/" + name + "/ec.pem"}
-    ]
+]
 
-    # Only load the basic communities
-    # requested_overlays = ['DiscoveryCommunity', 'AttestationCommunity', 'IdentityCommunity']
-    # configuration['overlays'] = [o for o in configuration['overlays'] if o['class'] in requested_overlays]
+# Launch IPv8 services.
+# We run REST endpoints for these services on:
+#  - http://localhost:14410/
+#  - http://localhost:14411/
+#  - ...
+# This script also prints the peer ids for reference with:
+#  - http://localhost:1441*/attestation?type=peers
 
-    # Give each peer a separate working directory
-    working_directory_overlays = ['AttestationCommunity', 'IdentityCommunity']
-    for overlay in configuration['overlays']:
-        if overlay['class'] in working_directory_overlays:
-            overlay['initialize'] = {'working_directory': 'temp/' + name}
+class MyService(object):
 
-    # Start the IPv8 service
-    ipv8 = IPv8(configuration)
-    rest_manager = RESTManager(ipv8)
-    rest_manager.start(14410 + i)
+    first_port = 14410
 
-    # Print the peer for reference
-    print("Starting peer " + name, i)
-    print("port", (14410 + i))
-    print("url", "http://localhost:" + str(14410 + i))
-    print("mid_b64", b64encode(ipv8.keys["anonymous id"].mid))
+    def __init__(self):
+        """
+        Keep track of the IPv8 instances and RESTAPIs
+        """
+        self.peers = [] # (index, name, ipv8, api)
+        self._stopping = False
 
-    data = {
-        'port': 14410 + i,
-        'mid_b64': b64encode(ipv8.keys["anonymous id"].mid).decode('utf-8'),
-    }
+    async def start(self):
+        
+        # Recreate the temp directory, so we always start fresh
+        self.clear_tempdir()
 
-    with open('temp/' + name + '/config.json', 'w') as outfile:
-        json.dump(data, outfile)
+        # Start each peer
+        for i in range(len(names)):
+            peer = await self.start_peer(names[i], i)
 
-reactor.run()
+            # Keep the instance and API for termination
+            self.peers.append(peer)
+
+        # Handle shut down
+        async def signal_handler(sig):
+            print("Received shut down signal %s" % sig)
+            if not self._stopping:
+                self._stopping = True
+
+                for (i, name, ipv8, api) in self.peers:
+                    print("Stopping peer %d (%s)" % (i, name))
+                    if api:
+                        await api.stop()
+                    await ipv8.stop()
+                
+                await gather(*all_tasks())
+                get_event_loop().stop()
+
+        signal.signal(signal.SIGINT, lambda sig, _: ensure_future(signal_handler(sig)))
+        signal.signal(signal.SIGTERM, lambda sig, _: ensure_future(signal_handler(sig)))            
+
+    def clear_tempdir(self):
+        if os.path.exists(tempdir):
+            shutil.rmtree(tempdir)
+
+        os.mkdir(tempdir)
+
+
+    async def start_peer(self, name, i):
+
+        # Give the peer its own working directory
+        workdir = u"%s/%s" % (tempdir, name)
+        os.mkdir(workdir)
+
+        # Set up its IPv8 Configuration
+        configuration = get_default_configuration()
+        configuration['logger']['level'] = "ERROR"
+        configuration['keys'] = [
+            {
+                'alias': "anonymous id", 
+                'generation': u"curve25519",
+                'file': u"%s/multichain.pem" % (workdir)
+            },
+            {
+                'alias': "my peer",
+                'generation': u"medium",
+                'file': u"%s/ec.pem" % (workdir)
+            }
+        ]
+
+        # Provide the working directory to its overlays
+        working_directory_overlays = ['AttestationCommunity', 'IdentityCommunity']
+        for overlay in configuration['overlays']:
+            if overlay['class'] in working_directory_overlays:
+                overlay['initialize'] = {'working_directory': workdir}
+
+        # Start its IPv8 service
+        ipv8 = IPv8(configuration)
+        await ipv8.start()
+
+        # Print the peer for reference
+        port = self.first_port + i
+        url = "http://localhost:%d" % port
+        mid_b64 = b64encode(ipv8.keys["anonymous id"].mid).decode('utf-8')
+
+        print("Starting peer %d (%s) running at %s" % (i, name, url))
+        print("- workdir: %s" % workdir)
+        print("- mid_b64: %s" % mid_b64)
+
+        data = {
+            'port': port,
+            'mid_b64': mid_b64,
+        }
+
+        with open('%s/config.json' % workdir, 'w') as outfile:
+            json.dump(data, outfile)
+
+        # Start its API
+        api = RESTManager(ipv8)
+        await api.start(port)
+
+        return (i, name, ipv8, api)
+
+
+def main():
+    service = MyService()
+
+    loop = get_event_loop()
+    coro = service.start()
+    ensure_future(coro)
+
+
+    if sys.platform == 'win32':
+        # Unfortunately, this is needed on Windows for Ctrl+C to work consistently.
+        # Should no longer be needed in Python 3.8.
+        async def wakeup():
+            while True:
+                await sleep(1)
+        ensure_future(wakeup())
+
+    loop.run_forever()
+
+
+if __name__ == "__main__":
+    main()
