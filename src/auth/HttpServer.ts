@@ -49,13 +49,20 @@ export class VerifyHttpServer {
         app.post(paths.getRequest, this.handleGetVerifyRequest.bind(this));
         app.post(paths.verifyMe, this.handleVerifyMe.bind(this));
         app.get(paths.getResult, this.handleGetResult.bind(this));
-        app.get("/client.js", this.serveScript.bind(this));
+        app.get("/script.js", this.serveScript.bind(this));
+        app.get("/templates", this.getTemplates.bind(this));
 
         app.use(this.handleError.bind(this));
 
         this.logger(`Listening at port ${this.port}.`);
         app.listen(this.port);
     }
+
+    protected getTemplates(req: Request, res: Response) {
+        res.set('Content-Type', 'application/json')
+        res.send(this.templates);
+    }
+
 
     protected serveScript(req: Request, res: Response) {
         res.set('Content-Type', 'text/javascript')
