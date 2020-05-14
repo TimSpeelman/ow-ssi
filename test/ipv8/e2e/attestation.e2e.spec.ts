@@ -1,6 +1,6 @@
 import { IPv8Service } from "../../../src/ipv8/IPv8Service";
 import { loadTemporaryIPv8Configuration } from "../../../src/util/ipv8conf";
-import { describe, expect, it } from "../../tools";
+import { before, describe, expect, it } from "../../tools";
 
 const aliceConf = loadTemporaryIPv8Configuration('test-alice');
 const chrisConf = loadTemporaryIPv8Configuration('test-bob');
@@ -17,8 +17,13 @@ describe("IPv8Service e2e Attestation", () => {
 
     const alice = new IPv8Service(config.aliceUrl, config.pollInterval);
     const chris = new IPv8Service(config.chrisUrl, config.pollInterval);
-    alice.start();
-    chris.start();
+
+    before(async () => {
+        await alice.startWhenReady(4000).catch((e) => { throw new Error(`IPv8 Service is not ready. No peers found.`) });
+        console.log("Alice is ready");
+        await chris.startWhenReady(4000).catch((e) => { throw new Error(`IPv8 Service is not ready. No peers found.`) });
+        console.log("Bob is ready");
+    })
 
     it("attestation staging works", async function () {
         // Chris grants attestation to Alice
