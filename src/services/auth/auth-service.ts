@@ -33,6 +33,7 @@ const argv = yargs
     .argv;
 
 const ipv8_port = argv["ipv8-port"];
+const server_port = argv["port"];
 const pollInterval = 200;
 
 // The container's host should mount this folder.
@@ -53,7 +54,7 @@ if (validationError) {
 
 console.log("Configuration loaded:", config);
 
-const { server_port, templates } = config;
+const { templates } = config;
 
 // Start listening to IPv8
 const ipv8URL = `http://localhost:${ipv8_port}`;

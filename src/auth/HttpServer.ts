@@ -5,6 +5,7 @@ import express, { Request, Response } from "express";
 import fs from "fs";
 import path from "path";
 import uuid from "uuid/v4";
+import { OWVerifyResponseValidator } from "../../modules/browser/ow";
 import { IPv8Service } from "../ipv8/IPv8Service";
 import { OWVerifier } from "../ow/protocol/OWVerifier";
 import { OWVerifyRequest, OWVerifyResponse } from "../ow/protocol/types";
@@ -126,11 +127,16 @@ export class VerifyHttpServer {
         const response = req.body.response;
         const baseUrl = `${req.protocol}://${req.headers.host}`;
 
+        const error = OWVerifyResponseValidator(response);
+
         if (!(uuid in this.refs)) {
             this.sendInvalidRequest(res, "No such uuid");
         } else {
-            const result = this.handleVerifyResponse(uuid, response, baseUrl);
-            res.send({ success: true })
+
+            this.handleVerifyResponse(uuid, response, baseUrl)
+                .then((ok) => res.send({ success: ok }))
+                .catch((e) => this.sendInvalidRequest(res, "Verification failed:" + e.message))
+
         }
     }
 
@@ -173,19 +179,15 @@ export class VerifyHttpServer {
             return new Error("Invalid response");
         } else {
             log("Server Verifying")
-            this.verifier.verify(req, response)
+            return this.verifier.verify(req, response)
                 .then((ok) => {
                     log("Verify successful")
                     this.refs[uuid].result = {
                         success: ok,
                         response: ok ? response : undefined,
                     }
+                    return ok;
                 })
-                .catch((e) => {
-                    log("Verify errd")
-                    throw e
-
-                });
         }
     }
 

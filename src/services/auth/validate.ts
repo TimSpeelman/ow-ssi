@@ -12,6 +12,5 @@ export const AuthServiceConfigValidator = many([
                 arrayWithEach(OWVerifyReqAttrValidator))
         ]))
     ),
-    atKey("server_port", number),
 ])
 
