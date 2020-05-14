@@ -127,7 +127,7 @@ class MyService(object):
 
         # Start its API
         api = RESTManager(ipv8)
-        await api.start(port)
+        await api.start(port, '0.0.0.0')
 
         return (i, name, ipv8, api)
 
