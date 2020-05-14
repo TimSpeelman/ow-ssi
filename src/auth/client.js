@@ -14,9 +14,14 @@ function OWVerifyServiceClient(initURL) {
         const xhr = new XMLHttpRequest();
         xhr.open("POST", initURL + "?template=" + templateName);
         xhr.onload = function () {
-            const resp = xhr.response;
-            const data = JSON.parse(resp);
-            callback(data);
+            if (xhr.status === 200 || xhr.status === 201) {
+                const resp = xhr.response;
+                const data = JSON.parse(resp);
+                callback(data);
+            }
+        }
+        xhr.onerror = function (e) {
+            console.error("OWAuthService: Could not request new verification session, got error:", e)
         }
         xhr.send();
     }
@@ -28,13 +33,18 @@ function OWVerifyServiceClient(initURL) {
             const xhr = new XMLHttpRequest();
             xhr.open("GET", resultURL);
             xhr.onload = function () {
-                const resp = xhr.response;
-                const data = JSON.parse(resp);
-                if (data.result) {
-                    onResult(data.result);
-                } else {
-                    timeout = setTimeout(makeRequest, pollIntervalInMillis)
+                if (xhr.status === 200 || xhr.status === 201) {
+                    const resp = xhr.response;
+                    const data = JSON.parse(resp);
+                    if (data.result) {
+                        onResult(data.result);
+                    } else {
+                        timeout = setTimeout(makeRequest, pollIntervalInMillis)
+                    }
                 }
+            }
+            xhr.onerror = function (e) {
+                console.error("OWAuthService: Got error polling result:", e)
             }
             xhr.send();
         }
