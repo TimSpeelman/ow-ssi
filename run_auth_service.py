@@ -94,8 +94,8 @@ class MyService(object):
         ]
         
         # Only load the basic communities
-        # requested_overlays = ['DiscoveryCommunity', 'AttestationCommunity', 'IdentityCommunity']
-        # configuration['overlays'] = [o for o in configuration['overlays'] if o['class'] in requested_overlays]
+        requested_overlays = ['DiscoveryCommunity', 'AttestationCommunity', 'IdentityCommunity']
+        configuration['overlays'] = [o for o in configuration['overlays'] if o['class'] in requested_overlays]
 
         # Provide the working directory to its overlays
         working_directory_overlays = ['AttestationCommunity', 'IdentityCommunity', 'TrustChainCommunity']
