@@ -34,6 +34,11 @@ export class IPv8Service {
         this.verifierService = new VerifierService(this.api, this.observer, this.peerService);
     }
 
+    async startWhenReady(timeoutInMillis = 3000) {
+        await this.observer.awaitReady(timeoutInMillis);
+        this.observer.start();
+    }
+
     start() {
         this.observer.start();
         return this;

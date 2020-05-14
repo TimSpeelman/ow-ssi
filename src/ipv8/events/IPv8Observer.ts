@@ -25,6 +25,7 @@ export class IPv8Observer {
 
     constructor(private api: IPv8API, private pollIntervalInMillis = 500, private terminateOnDisconnect = false) {
 
+
         this.peerPoller = new AsyncListPoller(() => this.api.listPeers().catch(this.handleOffline));
         this.attReqPoller = new AsyncListPoller(() => this.api.listAttestationRequests().catch(this.handleOffline));
         this.attPoller = new AsyncListPoller(() => this.api.listAttestations().catch(this.handleOffline));
@@ -34,6 +35,30 @@ export class IPv8Observer {
 
     get isRunning() {
         return this.active;
+    }
+
+    /** IPv8 is only ready when it has found at least one peer. */
+    public awaitReady(timeoutInMillis = 3000) {
+        let done = false;
+        let timer;
+        return new Promise((resolve, reject) => {
+            const readyPoller = new AsyncListPoller<string>(() => this.api.listPeers().catch(this.handleOffline));
+            readyPoller.hook.on((p) => {
+                if (!done && p.length > 0) {
+                    done = true;
+                    clearTimeout(timer);
+                    resolve();
+                }
+            })
+            readyPoller.start(200);
+            if (timeoutInMillis > 0) {
+                timer = setTimeout(() => {
+                    readyPoller.stop();
+                    done = true;
+                    reject();
+                }, timeoutInMillis);
+            }
+        })
     }
 
     public start() {
