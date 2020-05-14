@@ -41,7 +41,8 @@
         "free-attest": "ts-node -P ./tsconfig.commonjs.json ./src/examples/freeform-attest/example.ts",
         "recipe-client": "ts-node -P ./tsconfig.commonjs.json ./src/examples/recipe-client/index.ts",
         "observer": "ts-node -P ./tsconfig.commonjs.json ./src/examples/observer/index.ts",
-        "service:auth": "ts-node -P ./tsconfig.commonjs.json ./src/services/auth/auth-service.ts"
+        "service:auth": "ts-node -P ./tsconfig.commonjs.json ./src/services/auth/auth-service.ts",
+        "peerwatch": "ts-node -P ./tsconfig.commonjs.json ./src/examples/peerwatch/index.ts"
     },
     "lint-staged": {
         "{src,test}/**/*.ts": [
