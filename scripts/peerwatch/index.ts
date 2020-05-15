@@ -1,6 +1,6 @@
 import yargs from "yargs";
-import { IPv8API } from "../../ipv8/api/IPv8API";
-import { promiseTimer } from "../../util/promiseTimer";
+import { IPv8API } from "../../src/ipv8/api/IPv8API";
+import { promiseTimer } from "../../src/util/promiseTimer";
 
 const argv = yargs
     .option('ports', {
