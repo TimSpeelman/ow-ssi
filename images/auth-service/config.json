@@ -1,0 +1,24 @@
+{
+    "templates": {
+        "exampletemplate": {
+            "attributes": [
+                {
+                    "ref": "name",
+                    "name": "name",
+                    "format": "id_metadata",
+                    "include_value": true
+                }
+            ]
+        },
+        "anothertemplate": {
+            "attributes": [
+                {
+                    "ref": "age",
+                    "name": "age",
+                    "format": "id_metadata",
+                    "include_value": true
+                }
+            ]
+        }
+    }
+}
