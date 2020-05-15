@@ -84,7 +84,7 @@ attestationServer.post("/attestMe", async function (req: Request, res: Response,
     const offer = { ...baseOffer, subject_id };
 
     console.log("We will attest to", offer)
-    attester.attestByOffer(offer).then((a => console.log("attestation complete", a))).catch(next)
+    attester.attestByOffer(offer).then((a => console.log("attestation staged"))).catch(next)
 
     res.send({ offer });
 })

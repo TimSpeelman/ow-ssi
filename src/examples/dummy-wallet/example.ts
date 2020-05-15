@@ -92,6 +92,7 @@ class DummyWallet {
             res.send(true);
 
         } catch (e) {
+            console.log("Failure", e);
             next(e);
         }
     }
@@ -116,6 +117,7 @@ class DummyWallet {
             res.send(true);
 
         } catch (e) {
+            console.log("Failure", e);
             next(e);
         }
 
