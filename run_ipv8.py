@@ -106,7 +106,7 @@ class MyService(object):
             'AttestationCommunity', 
             'IdentityCommunity', 
             'DHTDiscoveryCommunity',
-            # 'DiscoveryCommunity'
+            'DiscoveryCommunity'
         ]
         configuration['overlays'] = [o for o in configuration['overlays'] if o['class'] in requested_overlays]
 
