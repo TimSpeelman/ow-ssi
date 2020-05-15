@@ -72,6 +72,7 @@ describe("OWVerifyServer end-to-end", () => {
     const client = new VerifyHttpClient(verifiee);
 
     it("verifies", async function () {
+
         // Alice has a repository with three attributes
         const repo = mockRepo([
             { name: prefix + "a1", value: "val1", format: "id_metadata", hash: att1.attribute_hash, metadata: null, signer_mid_b64: "" },
@@ -82,22 +83,28 @@ describe("OWVerifyServer end-to-end", () => {
         // Alice has a resolver
         const alicesResolver = new OWVerifyRequestResolver(config.aliceMid, repo);
 
-        // Alice scans a QR from a portal
-        const ref = await Axios.post(serverUrl + "/new-session?template=login").then(res => res.data);
+        // The web portal creates a new session
+        const newSession = await Axios.post(serverUrl + "/new-session?template=login").then(res => res.data);
+        expect(newSession).to.have.property("redirectURL");
+        expect(newSession).to.have.property("resultURL");
 
+        // Alice scans the QR, which contains the redirectURL
         // The Wallet retrieves the request
-        const request = await client.getVerifyRequest(ref.redirectURL);
+        const request = await client.getVerifyRequest(newSession.redirectURL);
+
+        // This request should validate
+        const errors = verifiee.validateRequest(request);
+        expect(errors).to.deep.equal([], "Expected OWVerifyRequest to validate")
 
         // Alice handles the request
         const resolveResult = await alicesResolver.resolveRequest(request);
+        expect(resolveResult.status).to.equal("success", "Expected Alice to successfully resolve the request");
 
         // Verification should complete
         await client.verifyMe(request, resolveResult.response);
 
-        await new Promise((r) => setTimeout(r, 2000));
-
         // The web portal receives the result
-        const verifyResult = await Axios.get(ref.resultURL).then(res => res.data);
+        const verifyResult = await Axios.get(newSession.resultURL).then(res => res.data);
 
         expect(verifyResult).to.have.property("result")
         expect(verifyResult.result).to.have.property("success", true)

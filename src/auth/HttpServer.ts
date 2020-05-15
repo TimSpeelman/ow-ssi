@@ -15,13 +15,14 @@ import { paths, VerifyResult } from "./IVerifyServerAPI";
 const log = debug("ow-ssi:verify-http-server");
 
 interface VerifySession {
-    template: string;
+    templateName: string;
     result?: VerifyResult;
+    request?: OWVerifyRequest;
 }
 
 export class VerifyHttpServer {
 
-    private refs: Dict<VerifySession> = {};
+    private sessions: Dict<VerifySession> = {};
 
     constructor(
         private templates: Dict<OWVerifyRequest>,
@@ -33,25 +34,18 @@ export class VerifyHttpServer {
 
     }
 
-    //
-    //
-    //
-    // TODO: Add directly embeddable script for web-client that generates QR and polls result.
-    //
-    //
-    //
-
     public start() {
         const app = express();
         app.use(bodyParser.json({ type: "application/json" }));
         app.use(cors());
 
-        app.post(paths.newSession, this.handleGetReference.bind(this));
-        app.post(paths.getRequest, this.handleGetVerifyRequest.bind(this));
+        // Endpoints
+        app.post(paths.newSession, this.handleNewSession.bind(this));
+        app.post(paths.getRequest, this.handleGetRequest.bind(this));
         app.post(paths.verifyMe, this.handleVerifyMe.bind(this));
         app.get(paths.getResult, this.handleGetResult.bind(this));
-        app.get("/client.js", this.serveScript.bind(this));
-        app.get("/templates", this.getTemplates.bind(this));
+        app.get("/client.js", this.handleGetClientScript.bind(this));
+        app.get("/templates", this.handleGetTemplates.bind(this));
 
         app.use(this.handleError.bind(this));
 
@@ -59,16 +53,20 @@ export class VerifyHttpServer {
         app.listen(this.port);
     }
 
-    protected getTemplates(req: Request, res: Response) {
+    /** List all templates in our current configuration */
+    protected handleGetTemplates(req: Request, res: Response) {
         res.set('Content-Type', 'application/json')
         res.send(this.templates);
     }
 
-
-    protected serveScript(req: Request, res: Response) {
+    /** Serve a simple JS client interface to use this service */
+    protected handleGetClientScript(req: Request, res: Response) {
         res.set('Content-Type', 'text/javascript')
         const js = fs.readFileSync(path.join(__dirname, "client.js"), { encoding: "utf8" });
+
+        // Replace the initialization URL with our current address
         const initURL = `${req.protocol}://${req.headers.host}${paths.newSession}`;
+
         res.send(js.replace("%INITURL%", initURL));
     }
 
@@ -78,41 +76,40 @@ export class VerifyHttpServer {
      * web-client to fetch the verification result once the Wallet
      * has completed it.
      */
-    protected handleGetReference(req: Request, res: Response) {
+    protected handleNewSession(req: Request, res: Response) {
         res.setHeader("content-type", "application/json");
 
-        const template = req.query.template;
+        const { template } = req.query;
 
-        // TODO Include uuid in request?
-        const url = `${req.protocol}://${req.headers.host}`;
-
-        if (template in this.templates) {
-            const uuid = this.createUUID(template);
-            const redirectURL = `${url}${paths.getRequest}?uuid=${uuid}`;
-            const resultURL = `${url}${paths.getResult}?uuid=${uuid}`;
-
-            res.send({ resultURL, redirectURL })
-        } else {
-            this.sendInvalidRequest(res, "No such template");
+        if (!(template in this.templates)) {
+            return this.sendInvalidRequest(res, "No such template");
         }
+
+        const uuid = this.createNewSessionFromTemplate(template);
+        const address = `${req.protocol}://${req.headers.host}`;
+        const redirectURL = `${address}${paths.getRequest}?uuid=${uuid}`;
+        const resultURL = `${address}${paths.getResult}?uuid=${uuid}`;
+
+        res.send({ resultURL, redirectURL })
     }
 
     /**
      * The Wallet will call this endpoint to retrieve the 
      * OWVerifyRequest that belongs to the UUID it has received.
      */
-    protected async handleGetVerifyRequest(req: Request, res: Response) {
+    protected async handleGetRequest(req: Request, res: Response) {
         res.setHeader("content-type", "application/json");
 
-        const uuid = req.query.uuid;
-        const response_url = `${req.protocol}://${req.headers.host}${paths.verifyMe}?uuid=${uuid}`;
+        const { uuid } = req.query;
 
-        if (!(uuid in this.refs)) {
-            this.sendInvalidRequest(res, "No such uuid");
-        } else {
-            const template = this.refs[uuid].template;
-            res.send(await this.makeVerifyRequest(template, response_url)) // TODO include uuid in return_address?
+        if (!(uuid in this.sessions)) {
+            return this.sendInvalidRequest(res, "No such uuid");
         }
+
+        const address = `${req.protocol}://${req.headers.host}`;
+        const responseURL = `${address}${paths.verifyMe}?uuid=${uuid}`;
+
+        res.send(await this.makeVerifyRequest(uuid, responseURL))
     }
 
     /**
@@ -123,21 +120,24 @@ export class VerifyHttpServer {
     protected handleVerifyMe(req: Request, res: Response) {
         res.setHeader("content-type", "application/json");
 
-        const uuid = req.query.uuid; // TODO include uuid in GET?
-        const response = req.body.response;
-        const baseUrl = `${req.protocol}://${req.headers.host}`;
+        const { uuid } = req.query;
 
+        if (!(uuid in this.sessions)) {
+            return this.sendInvalidRequest(res, "No such uuid");
+        }
+
+        const { response } = req.body;
         const error = OWVerifyResponseValidator(response);
 
-        if (!(uuid in this.refs)) {
-            this.sendInvalidRequest(res, "No such uuid");
-        } else {
-
-            this.handleVerifyResponse(uuid, response, baseUrl)
-                .then((ok) => res.send({ success: ok }))
-                .catch((e) => this.sendInvalidRequest(res, "Verification failed:" + e.message))
-
+        if (error) {
+            return this.sendInvalidRequest(res, "Invalid VerifyResponse:" + error);
         }
+
+        const address = `${req.protocol}://${req.headers.host}`;
+
+        this.handleVerifyResponse(uuid, response, address)
+            .then((ok) => res.send({ success: ok }))
+            .catch((e) => this.sendInvalidRequest(res, "Verification failed:" + e.message))
     }
 
     /**
@@ -147,32 +147,44 @@ export class VerifyHttpServer {
     protected handleGetResult(req: Request, res: Response) {
         res.setHeader("content-type", "application/json");
 
-        const uuid = req.query.uuid;
+        const { uuid } = req.query;
 
-        if (!(uuid in this.refs)) {
-            this.sendInvalidRequest(res, "No such uuid");
-        } else {
-            res.send({ result: this.refs[uuid].result })
+        if (!(uuid in this.sessions)) {
+            return this.sendInvalidRequest(res, "No such uuid");
         }
+
+        res.send({ result: this.sessions[uuid].result })
     }
 
-    protected createUUID(template: string) {
+    /** Simply register a new session */
+    protected createNewSessionFromTemplate(templateName: string) {
         const id = uuid();
-        this.refs[id] = { template };
+
+        this.sessions[id] = { templateName };
+
         return id;
     }
 
-    protected async makeVerifyRequest(template: string, responseUrl: string): Promise<OWVerifyRequest> {
-        return {
-            ...this.templates[template],
+    /** Generate the VerifyRequest to send to the subject */
+    protected async makeVerifyRequest(uuid: string, responseUrl: string): Promise<OWVerifyRequest> {
+        const session = this.sessions[uuid];
+
+        const request = {
+            ...this.templates[session.templateName],
             verifier_id: await this.getMyId(),
             http_return_address: responseUrl
         };
+
+        session.request = request;
+
+        return request;
     }
 
+    /** Perform verification based on a response */
     protected async handleVerifyResponse(uuid: string, response: OWVerifyResponse, baseUrl: string) {
-        const process = this.refs[uuid];
-        const req = await this.makeVerifyRequest(process.template, baseUrl);
+        const session = this.sessions[uuid];
+
+        const req = session.request;
 
         if (this.verifier.validateResponse(req, response).length > 0) {
             log("Invalid OWVerifyResponse")
@@ -182,7 +194,7 @@ export class VerifyHttpServer {
             return this.verifier.verify(req, response)
                 .then((ok) => {
                     log("Verify successful")
-                    this.refs[uuid].result = {
+                    this.sessions[uuid].result = {
                         success: ok,
                         response: ok ? response : undefined,
                     }

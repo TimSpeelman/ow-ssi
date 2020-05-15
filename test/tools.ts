@@ -1,6 +1,17 @@
 import chai from "chai";
 import { before, describe, it } from "mocha";
+
 const expect = chai.expect;
 
-export { chai, describe, it, expect, before };
+/** Avoid calling done multiple times */
+const donce = (done: (e?: any) => void) => {
+    let called = false;
+    return (e?: any) => {
+        if (called) return;
+        called = true;
+        done(e);
+    }
+}
+
+export { chai, describe, it, expect, before, donce };
 

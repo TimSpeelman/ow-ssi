@@ -1,6 +1,6 @@
 import { IPv8Service } from "../../../src/ipv8/IPv8Service";
 import { loadTemporaryIPv8Configuration } from "../../../src/util/ipv8conf";
-import { before, describe, expect, it } from "../../tools";
+import { before, describe, donce, expect, it } from "../../tools";
 
 const aliceConf = loadTemporaryIPv8Configuration('test-alice');
 const chrisConf = loadTemporaryIPv8Configuration('test-bob');
@@ -17,6 +17,8 @@ describe("IPv8Service e2e Attestation", () => {
 
     const alice = new IPv8Service(config.aliceUrl, config.pollInterval);
     const chris = new IPv8Service(config.chrisUrl, config.pollInterval);
+
+    const maxWait = 2000;
 
     before(async () => {
         await alice.startWhenReady(4000).catch((e) => { throw new Error(`IPv8 Service is not ready. No peers found.`) });
@@ -35,7 +37,7 @@ describe("IPv8Service e2e Attestation", () => {
         // Alice requests attestation by Chris
         const attestations = await alice.attesteeService.requestAttestation(
             config.chrisMid,
-            [{ attribute_name: "attr1", id_format: "id_metadata" }]);
+            [{ attribute_name: "attr1", id_format: "id_metadata" }], maxWait);
 
         expect(attestations).to.have.length(1);
         expect(attestations[0]).to.have.property("attribute_name", "attr1")
@@ -53,11 +55,25 @@ describe("IPv8Service e2e Attestation", () => {
         // Alice requests attestation by Chris
         const attestations = await alice.attesteeService.requestAttestation(
             config.chrisMid,
-            [{ attribute_name: "attr2", id_format: "id_metadata" }]);
+            [{ attribute_name: "attr2", id_format: "id_metadata" }], maxWait);
 
         expect(attestations).to.have.length(1);
         expect(attestations[0]).to.have.property("attribute_name", "attr2")
         expect(attestations[0]).to.have.property("signer_mid_b64", config.chrisMid)
+    })
+
+    it("attestation timeout works", function (_done) {
+        const done = donce(_done);
+        setTimeout(() => done("Expected request attestation to timeout sooner"), maxWait + 500);
+
+        // Chris does not grant attestation to Alice
+
+        // Alice requests attestation by Chris
+        alice.attesteeService.requestAttestation(
+            config.chrisMid,
+            [{ attribute_name: "attr1", id_format: "id_metadata" }], maxWait)
+            .then(() => done("Attestation should not succeed"))
+            .catch(() => done())
     })
 
     // it("self-verification works", async function () {

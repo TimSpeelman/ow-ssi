@@ -15,7 +15,7 @@ export class VerifyHttpClient {
         });
     }
 
-    verifyMe(request: OWVerifyRequest, response: OWVerifyResponse) {
+    verifyMe(request: OWVerifyRequest, response: OWVerifyResponse, timeout = 3000) {
         const validUntil = Date.now() + 10000;
 
         const verifResult = this.verifieeService.allowVerification(request, validUntil);
@@ -26,11 +26,16 @@ export class VerifyHttpClient {
             throw e;
         });;
 
-        // send response and uuid to server, receives validation result.
-        return Promise.all([
-            verifResult,
-            submitResult,
-        ]);
+        return new Promise(async (resolve, reject) => {
+            let ok = false;
+            setTimeout(() => !ok ? reject(new Error("Timeout")) : null, timeout);
+
+            // send response and uuid to server, receives validation result.
+            return Promise.all([
+                verifResult,
+                submitResult,
+            ]).then(resolve).catch(reject);
+        })
     }
 
 }
