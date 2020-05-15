@@ -57,7 +57,7 @@ async function keepFinding(api: IPv8API, targetMid: string, cb: (r: Result) => v
         if (typeof result !== "string") {
             await promiseTimer(againAfter);
         }
-        console.log("Result", targetMid, result);
+        // console.log("Result", targetMid, result);
         hook.fire(result);
     }
 }
@@ -72,17 +72,42 @@ async function run(ports: number[]) {
 async function runOnline(ports: number[], apis: IPv8API[], mids: string[]) {
 
     let results = ports.map(p1 => ports.map(p2 => null));
-    const onResult = (i: number, j: number) => (result: Result) => { results[i][j] = result }
+
+    // Keep track of each ip per mid
+    let ips = {};
+    mids.forEach(mid => { ips[mid] = [] });
+
+    const onResult = (srcIndex: number, trgIndex: number, trgMid: string) => (result: Result) => {
+        if (typeof result !== "string") {
+            result.forEach(peer => {
+                const addr = `${peer.address[0]}:${peer.address[1]}`;
+                if (ips[trgMid].indexOf(addr) < 0) {
+                    ips[trgMid].push(addr);
+                }
+            });
+
+        }
+        results[srcIndex][trgIndex] = result
+    }
+
+
+
+
     const formatResult = (f: Result, i: number, j: number) => f === null ? " " :
         (typeof f === "string" ? colors.red("E") : colors.green(`${j}`))
 
-    apis.map((api, i) => mids.map((mid, j) => i !== j && keepFinding(api, mid, onResult(i, j))));
+    apis.map((api, i) => mids.map((mid, j) => i !== j && keepFinding(api, mid, onResult(i, j, mid))));
 
     while (true) {
         console.clear();
+        console.log("DHT Discovery: ");
         results.map((x, i) => {
 
             console.log(`${i}) ${ports[i]}, ${mids[i]}: ${results[i].map((f, j) => i === j ? "." : formatResult(f, i, j)).join(" ")}`)
+        })
+        console.log("Addresses: ");
+        mids.map((mid) => {
+            console.log(`${mid.substr(0, chars)}: ${ips[mid].join(", ")}`)
         })
         await promiseTimer(1000);
 
