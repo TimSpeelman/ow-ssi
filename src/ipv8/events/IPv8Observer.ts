@@ -8,11 +8,11 @@ const log = debug("ow-ssi:ipv8:observer");
 /** Observes the IPv8 API for new information and fires corresponding events */
 export class IPv8Observer {
 
-    protected peerPoller: AsyncListPoller<string>;
-    protected attReqPoller: AsyncListPoller<InboundAttestationRequest>;
-    protected attPoller: AsyncListPoller<Attestation>;
-    protected verifReqPoller: AsyncListPoller<InboundVerificationRequest>;
-    protected verifPoller: AsyncListPoller<VerificationOutputPair>;
+    readonly peerPoller: AsyncListPoller<string>;
+    readonly attReqPoller: AsyncListPoller<InboundAttestationRequest>;
+    readonly attPoller: AsyncListPoller<Attestation>;
+    readonly verifReqPoller: AsyncListPoller<InboundVerificationRequest>;
+    readonly verifPoller: AsyncListPoller<VerificationOutputPair>;
 
     get onPeerFound() { return this.peerPoller.hook.on };
     get onAttestationRequest() { return this.attReqPoller.hook.on };

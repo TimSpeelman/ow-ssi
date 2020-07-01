@@ -12,7 +12,7 @@ export class AsyncListPoller<T> {
     private interval: IntervalSubscription;
 
     /** Latest result of poll */
-    private cache: T[] = [];
+    public cache: T[] = [];
 
     constructor(protected poll: () => Promise<T[]>, protected compare: Comparator<T> = isEqual) { }
 
