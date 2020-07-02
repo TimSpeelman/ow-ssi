@@ -15,7 +15,7 @@ export class OWAttester {
             attribute_name: a.name,
             attribute_value: a.value,
         }))
-        const validUntil = Date.now() + 10000; // FIXME
+        const validUntil = Date.now() + 24 * 3600 * 1000; // FIXME
         this.ipv8Attester.stageAttestation(offer.subject_id, attrs, validUntil);
     }
 
