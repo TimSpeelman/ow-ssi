@@ -42,7 +42,7 @@ export class VerifierService implements IVerifierService {
                 await this.peerService.findPeer(mid_b64);
 
                 log("Requesting verification", mid_b64, attribute_hash_b64, attribute_value);
-                this.api.requestVerification(mid_b64, attribute_hash_b64, attribute_value);
+                this.api.requestVerification(mid_b64, attribute_hash_b64, attribute_value).catch(reject);
 
                 this.observer.onVerification((verif) => {
                     if (verif.attribute_hash === attribute_hash_b64) {
