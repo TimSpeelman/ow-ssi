@@ -36,7 +36,7 @@ export class OWVerifyRequestHandler {
         const consent = await this.consentCallback(result);
 
         if (consent) {
-            const validUntil = Date.now() + 10000; // FIXME
+            const validUntil = Date.now() + 24 * 3600 * 1000; // FIXME
             this.verifieeService.allowVerification(req, validUntil);
         }
     }
