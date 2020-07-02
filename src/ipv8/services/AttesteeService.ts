@@ -19,7 +19,7 @@ export class AttesteeService implements IAttesteeService {
     public async requestAttestation(
         mid_b64: string,
         credentials: AttestationSpec[],
-        timeoutPerAttestationInMillis = 5000,
+        timeoutPerAttestationInMillis = 10000,
     ): Promise<Attestation[]> {
         this.requireIPv8Observer();
 
@@ -36,7 +36,7 @@ export class AttesteeService implements IAttesteeService {
         mid_b64: string,
         attribute_name: string,
         id_format: string,
-        timeoutInMillis = 5000,
+        timeoutInMillis = 10000,
     ): Promise<Attestation> {
         this.requireIPv8Observer();
 
