@@ -1,4 +1,4 @@
-import axios, { AxiosError } from 'axios';
+import { AxiosError, AxiosInstance, default as axios } from 'axios';
 import debug from "debug";
 import { b64encode } from '../../util/b64';
 import { b64ToHex } from "../../util/b64ToHex";
@@ -12,12 +12,17 @@ const log = debug("ow-ssi:ipv8:api");
  * A client for the IPv8 Attestation API.
  */
 export class IPv8API {
-    constructor(private ipv8_api_url: string) { }
+
+    protected api: AxiosInstance
+
+    constructor(protected baseURL: string) {
+        this.api = axios.create({ baseURL });
+    }
 
     /** Get my Member ID */
     public getMyId(): Promise<string> {
-        return axios
-            .get(this.ipv8_api_url + '/me')
+        return this.api
+            .get('/me')
             .then(res => res.data.mid)
             .catch(this.handleError.bind(this))
     }
@@ -31,21 +36,21 @@ export class IPv8API {
 
     /** Get the list of discovered peers */
     public listPeers(): Promise<string[]> {
-        return axios
-            .get(this.ipv8_api_url + '/attestation?type=peers')
+        return this.api
+            .get('/attestation?type=peers')
             .then(res => res.data)
             .catch(this.handleError.bind(this))
     }
 
     /** Make sure we look for a particular peer */
     public connectPeer(mid_b64: string): Promise<Peer[]> {
-        log("ConnectPeer", this.ipv8_api_url, mid_b64);
+        log("ConnectPeer", this.baseURL, mid_b64);
 
         if (!mid_b64 || mid_b64.length === 0) {
             throw new Error("Not a valid mid");
         }
-        return axios
-            .get(this.ipv8_api_url + `/dht/peers/${b64ToHex(mid_b64)}`)
+        return this.api
+            .get(`/dht/peers/${b64ToHex(mid_b64)}`)
             .then((response: any) => response.data.peers)
             .catch(this.handleError.bind(this))
     }
@@ -62,18 +67,18 @@ export class IPv8API {
             attribute_name,
             id_format
         }
-        log("RequestAttestation", this.ipv8_api_url, query);
+        log("RequestAttestation", this.baseURL, query);
 
-        return axios
-            .post(this.ipv8_api_url + `/attestation?${queryString(query)}`)
+        return this.api
+            .post(`/attestation?${queryString(query)}`)
             .then(res => res.data.success)
             .catch(this.handleError.bind(this))
     }
 
     /** List all attestation requests we received */
     public listAttestationRequests(): Promise<InboundAttestationRequest[]> {
-        return axios
-            .get(this.ipv8_api_url + '/attestation?type=outstanding')
+        return this.api
+            .get('/attestation?type=outstanding')
             .then(res =>
                 res.data.map(([mid_b64, attribute_name, metadata]: string[]): InboundAttestationRequest => ({
                     mid_b64,
@@ -92,18 +97,18 @@ export class IPv8API {
             attribute_name,
             attribute_value: b64encode(attribute_value)
         }
-        log("Attest", this.ipv8_api_url, query);
+        log("Attest", this.baseURL, query);
 
-        return axios
-            .post(this.ipv8_api_url + `/attestation?${queryString(query)}`)
+        return this.api
+            .post(`/attestation?${queryString(query)}`)
             .then(res => res.data)
             .catch(this.handleError.bind(this))
     }
 
     /** List all created attestations */
     public listAttestations(): Promise<Attestation[]> {
-        return axios
-            .get(this.ipv8_api_url + '/attestation?type=attributes')
+        return this.api
+            .get('/attestation?type=attributes')
             .then(res =>
                 res.data.map(
                     ([attribute_name, attribute_hash, metadata, signer_mid_b64]: string[]): Attestation => ({
@@ -134,18 +139,18 @@ export class IPv8API {
             id_metadata: b64encode(JSON.stringify(id_metadata_obj))
         }
 
-        log("RequestVerify", this.ipv8_api_url, query);
+        log("RequestVerify", this.baseURL, query);
 
-        return axios
-            .post(this.ipv8_api_url + `/attestation?${queryString(query)}`, '')
+        return this.api
+            .post(`/attestation?${queryString(query)}`, '')
             .then(response => response.data.success)
             .catch(this.handleError.bind(this))
     }
 
     /** Get all outstanding verification requests we received from peers */
     public listVerificationRequests(): Promise<InboundVerificationRequest[]> {
-        return axios
-            .get(this.ipv8_api_url + '/attestation?type=outstanding_verify')
+        return this.api
+            .get('/attestation?type=outstanding_verify')
             .then(res =>
                 res.data.map(([mid_b64, attribute_name]: string[]): InboundVerificationRequest =>
                     ({ mid_b64, attribute_name }))
@@ -162,18 +167,18 @@ export class IPv8API {
             attribute_name
         }
 
-        log("AllowVerify", this.ipv8_api_url, query);
+        log("AllowVerify", this.baseURL, query);
 
-        return axios
-            .post(this.ipv8_api_url + `/attestation?${queryString(query)}`)
+        return this.api
+            .post(`/attestation?${queryString(query)}`)
             .then(res => res.data.success)
             .catch(this.handleError.bind(this))
     }
 
     /** List all verification outputs (pending and completed) */
     public listVerificationOutputs(): Promise<VerificationOutputPair[]> {
-        return axios
-            .get(this.ipv8_api_url + '/attestation?type=verification_output')
+        return this.api
+            .get('/attestation?type=verification_output')
             .then((res: { data: VerificationOutputMap }) =>
                 Object.entries(res.data)
                     .reduce((output, [attribute_hash, results]) => {
