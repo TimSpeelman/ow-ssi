@@ -3,7 +3,7 @@ import { OWAttestee } from "../../../src/ow/protocol/OWAttestee";
 import { OWAttester } from "../../../src/ow/protocol/OWAttester";
 import { OWAttestOffer } from "../../../src/ow/protocol/types";
 import { loadTemporaryIPv8Configuration } from "../../../src/util/ipv8conf";
-import { describe, expect, it } from "../../tools";
+// import { describe, expect } from "../../tools";
 
 const aliceConf = loadTemporaryIPv8Configuration('test-alice');
 const chrisConf = loadTemporaryIPv8Configuration('test-bob');
@@ -26,7 +26,7 @@ describe("OWAttestation end-to-end", () => {
     const attestee = new OWAttestee(alice.attesteeService);
     const attester = new OWAttester(chris.attesterService);
 
-    it("attests based on an OW req/resp pair", async function () {
+    test("attests based on an OW req/resp pair", async function () {
 
         // Chris creates an Attestation Offer
         const offer: OWAttestOffer = {
@@ -48,9 +48,9 @@ describe("OWAttestation end-to-end", () => {
         // Alice handles the offer by requesting IPv8 attestation
         const results = await attestee.requestAttestationByOffer(offer);
 
-        expect(results).to.have.length(2, "Expected two attestations");
-        expect(results[0].name).to.equal("a1");
-        expect(results[1].name).to.equal("a2");
+        expect(results).toHaveLength(2) // Expected two attestations
+        expect(results[0].name).toEqual("a1");
+        expect(results[1].name).toEqual("a2");
 
     })
 

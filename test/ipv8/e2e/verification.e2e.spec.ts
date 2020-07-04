@@ -1,7 +1,6 @@
 import { Attestation } from "../../../src/ipv8/api/types";
 import { IPv8Service } from "../../../src/ipv8/IPv8Service";
 import { loadTemporaryIPv8Configuration } from "../../../src/util/ipv8conf";
-import { describe, expect, it } from "../../tools";
 
 const aliceConf = loadTemporaryIPv8Configuration('test-alice');
 const bobConf = loadTemporaryIPv8Configuration('test-bob');
@@ -21,7 +20,7 @@ describe("IPv8Service e2e Verification", () => {
     alice.start();
     bob.start();
 
-    it("verification staging works", async function () {
+    test("verification staging works", async function () {
         // Prepare by attesting to Alice
         const attestation = await attestToAlice("attr3", "val3");
 
@@ -40,10 +39,10 @@ describe("IPv8Service e2e Verification", () => {
                 attribute_value: "val3"
             }]);
 
-        expect(verification).to.equal(true);
+        expect(verification).toBe(true);
     })
 
-    it("unstaged verification works", async function () {
+    test("unstaged verification works", async function () {
         // Prepare by attesting to Alice
         const attestation = await attestToAlice("attr4", "val4");
 
@@ -61,10 +60,10 @@ describe("IPv8Service e2e Verification", () => {
                 attribute_value: "val4"
             }]);
 
-        expect(verification).to.equal(true);
+        expect(verification).toBe(true);
     })
 
-    // it("self-verification works", async function () {
+    // test("self-verification works", async function () {
     //     // Prepare by attesting to Alice
     //     const attestation = await attestToAlice("attr3", "val3");
 
@@ -81,7 +80,7 @@ describe("IPv8Service e2e Verification", () => {
     //             attribute_value: "val3"
     //         }]);
 
-    //     expect(verification).to.equal(true);
+    //     expect(verification).toBe(true);
     // })
 
     /** Lets Bob attest to Alice */

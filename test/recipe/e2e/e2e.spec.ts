@@ -6,7 +6,7 @@ import { RecipeClient } from "../../../src/recipe/RecipeClient";
 import { RecipeConfiguration, RecipeServer } from "../../../src/recipe/RecipeServer";
 import { loadTemporaryIPv8Configuration } from "../../../src/util/ipv8conf";
 import { attest } from "../../ipv8/attest";
-import { describe, expect, it } from "../../tools";
+// import { describe, expect } from "../../tools";
 
 
 const serverConf = loadTemporaryIPv8Configuration("test-bob")
@@ -83,17 +83,17 @@ describe("Recipe Service Attestation", function () {
     let serverIPv8: IPv8Service;
     let clientIPv8: IPv8Service;
 
-    this.beforeEach(() => {
+    beforeEach(() => {
         serverIPv8 = new IPv8Service(serverPeer.ipv8_url).start();
         clientIPv8 = new IPv8Service(clientPeer.ipv8_url).start();
     })
 
-    this.afterEach(() => {
+    afterEach(() => {
         serverIPv8.stop();
         clientIPv8.stop();
     })
 
-    it("attests without verification", async function () {
+    test("attests without verification", async function () {
 
         const server = new RecipeServer(serverPeer.mid_b64, serverIPv8, recipes);
 
@@ -107,18 +107,18 @@ describe("Recipe Service Attestation", function () {
         const offer = await server.executeRecipe(request);
 
         const errors = process.validateOffer(offer);
-        expect(errors).to.deep.equal([], "Expected offer to pass validation");
+        expect(errors).toEqual([]) // Expected offer to pass validation
 
         const data = await process.requestAttestation(offer);
 
-        expect(data).to.be.an("array");
-        expect(data).to.have.length(1);
-        expect(data[0]).to.deep.property("name", ATT_ZERO);
-        expect(data[0]).to.have.property("value", ATT_ZERO_VAL);
+        expect(data).toEqual(expect.any(Array));
+        expect(data).toHaveLength(1);
+        expect(data[0]).toHaveProperty("name", ATT_ZERO);
+        expect(data[0]).toHaveProperty("value", ATT_ZERO_VAL);
     });
 
 
-    it("attests with verification", async function () {
+    test("attests with verification", async function () {
 
         const server = new RecipeServer(serverPeer.mid_b64, serverIPv8, recipes);
 
@@ -152,14 +152,14 @@ describe("Recipe Service Attestation", function () {
         const offer = await server.executeRecipe(request);
 
         const errors = process.validateOffer(offer);
-        expect(errors).to.deep.equal([], "Expected offer to pass validation");
+        expect(errors).toEqual([]) // Expected offer to pass validation
 
         const data = await process.requestAttestation(offer);
 
-        expect(data).to.be.an("array");
-        expect(data).to.have.length(1);
-        expect(data[0]).to.deep.property("name", ATT_ONE);
-        expect(data[0]).to.have.property("value", ATT_ONE_VAL);
+        expect(data).toEqual(expect.any(Array));
+        expect(data).toHaveLength(1);
+        expect(data[0]).toHaveProperty("name", ATT_ONE);
+        expect(data[0]).toHaveProperty("value", ATT_ONE_VAL);
     });
 
 
