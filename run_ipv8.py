@@ -3,6 +3,7 @@ import os
 import shutil
 import signal
 import sys
+from binascii import hexlify
 
 from asyncio import all_tasks, ensure_future, gather, get_event_loop, sleep
 from base64 import b64encode
@@ -128,6 +129,7 @@ class MyService(object):
         print("Starting peer %d (%s) running at %s" % (i, name, url))
         print("- workdir: %s" % workdir)
         print("- mid_b64: %s" % mid_b64)
+        print("- mid_hex: %s" % hexlify(ipv8.keys["anonymous id"].mid))
 
         data = {
             'port': port,
