@@ -62,7 +62,6 @@
         },
         "testEnvironment": "node",
         "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",
-        "testTimeout": 10000,
         "moduleFileExtensions": [
             "ts",
             "tsx",
@@ -82,12 +81,7 @@
         },
         "collectCoverageFrom": [
             "src/*.{js,ts}"
-        ],
-        "globals": {
-            "ts-jest": {
-                "tsConfig": "tsconfig.commonjs.json"
-            }
-        }
+        ]
     },
     "prettier": {
         "semi": false,
@@ -121,6 +115,7 @@
         "jest-config": "^26.0.1",
         "lint-staged": "^8.0.0",
         "lodash.camelcase": "^4.3.0",
+        "mocha": "*",
         "prettier": "^1.14.3",
         "prompt": "^1.0.0",
         "readline": "^1.3.0",
@@ -137,15 +132,14 @@
         "sinon": "^7.3.2",
         "source-map-loader": "^0.2.4",
         "travis-deploy-once": "^5.0.9",
-        "ts-jest": "^26.1.1",
+        "ts-jest": "^25.5.1",
         "ts-node": "^8.3.0",
         "tslint": "^5.11.0",
         "tslint-config-prettier": "^1.15.0",
         "tslint-config-standard": "^8.0.1",
-        "typescript": "^3.9.6"
+        "typescript": "^3.5.2"
     },
     "dependencies": {
-        "@types/jest": "^26.0.3",
         "@types/yargs": "^15.0.4",
         "atob": "^2.1.2",
         "axios": "^0.19.0",
@@ -154,7 +148,6 @@
         "cors": "^2.8.5",
         "debug": "^4.1.1",
         "express": "^4.17.1",
-        "jest": "^26.1.0",
         "lodash": "^4.17.15",
         "qrcode-svg": "^1.1.0",
         "uuid": "^3.3.2",

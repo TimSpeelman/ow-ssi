@@ -9,7 +9,7 @@ import { OWVerifyRequest } from "../../../src/ow/protocol/types";
 import { OWVerifyRequestResolver } from "../../../src/ow/resolution/OWVerifyRequestResolver";
 import { loadTemporaryIPv8Configuration } from "../../../src/util/ipv8conf";
 import { mockRepo } from "../../ow/mockRepo";
-// import { before, describe, expect } from "../../tools";
+import { before, describe, expect, it } from "../../tools";
 
 const prefix = "ow-authserver-";
 
@@ -36,7 +36,7 @@ describe("OWVerifyServer end-to-end", () => {
     let att2: Attestation;
     let att3: Attestation;
 
-    beforeAll(async () => {
+    before(async () => {
         // Prepare by attesting to Alice
         att1 = await attestToAlice(prefix + "a1", "val1");
         att2 = await attestToAlice(prefix + "a2", "val2");
@@ -71,7 +71,7 @@ describe("OWVerifyServer end-to-end", () => {
 
     const client = new VerifyHttpClient(verifiee);
 
-    test("verifies", async function () {
+    it("verifies", async function () {
 
         // Alice has a repository with three attributes
         const repo = mockRepo([
@@ -85,8 +85,8 @@ describe("OWVerifyServer end-to-end", () => {
 
         // The web portal creates a new session
         const newSession = await Axios.post(serverUrl + "/new-session?template=login").then(res => res.data);
-        expect(newSession).toHaveProperty("redirectURL");
-        expect(newSession).toHaveProperty("resultURL");
+        expect(newSession).to.have.property("redirectURL");
+        expect(newSession).to.have.property("resultURL");
 
         // Alice scans the QR, which contains the redirectURL
         // The Wallet retrieves the request
@@ -94,11 +94,11 @@ describe("OWVerifyServer end-to-end", () => {
 
         // This request should validate
         const errors = verifiee.validateRequest(request);
-        expect(errors).toEqual([]) // Expected OWVerifyRequest to validate
+        expect(errors).to.deep.equal([], "Expected OWVerifyRequest to validate")
 
         // Alice handles the request
         const resolveResult = await alicesResolver.resolveRequest(request);
-        expect(resolveResult.status).toEqual("success") // Expected Alice to successfully resolve the request
+        expect(resolveResult.status).to.equal("success", "Expected Alice to successfully resolve the request");
 
         // Verification should complete
         await client.verifyMe(request, resolveResult.response);
@@ -106,8 +106,8 @@ describe("OWVerifyServer end-to-end", () => {
         // The web portal receives the result
         const verifyResult = await Axios.get(newSession.resultURL).then(res => res.data);
 
-        expect(verifyResult).toHaveProperty("result")
-        expect(verifyResult.result).toHaveProperty("success", true)
+        expect(verifyResult).to.have.property("result")
+        expect(verifyResult.result).to.have.property("success", true)
 
     })
 

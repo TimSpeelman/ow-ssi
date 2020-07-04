@@ -2,9 +2,7 @@ import { AxiosError } from "axios";
 
 export function toHttpError(e: AxiosError): Error {
     if (e.code === "ECONNREFUSED") {
-        // @ts-ignore
-        const { address, port } = e;
-        return new Error(`Address '${address}:${port}' refused connection.`)
+        return new Error(`Address '${e.request.path}' refused connection.`)
     } else if (e.response) {
         if (e.response.status === 404) {
             return new Error(`Request '${e.request.method} ${e.request.path}' failed with status 404 NOT FOUND.`)

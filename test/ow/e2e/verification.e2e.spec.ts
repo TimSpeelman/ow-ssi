@@ -6,7 +6,7 @@ import { OWVerifyRequest, OWVerifyResponse } from "../../../src/ow/protocol/type
 import { OWVerifyRequestResolver } from "../../../src/ow/resolution/OWVerifyRequestResolver";
 import { loadTemporaryIPv8Configuration } from "../../../src/util/ipv8conf";
 import { attest } from "../../ipv8/attest";
-// import { before, describe, expect } from "../../tools";
+import { before, describe, expect, it } from "../../tools";
 import { mockRepo } from "../mockRepo";
 
 const aliceConf = loadTemporaryIPv8Configuration('test-alice')
@@ -41,7 +41,7 @@ describe("OWVerification end-to-end", () => {
         ],
     };
 
-    beforeAll(async () => {
+    before(async () => {
         const attributes = [
             { attribute_name: "a1", attribute_value: "v1" },
             { attribute_name: "a2", attribute_value: "v2" },
@@ -53,7 +53,7 @@ describe("OWVerification end-to-end", () => {
         attested.map(a => aliceRepo.put(a))
     })
 
-    test("verifies based on an OW req/resp pair", async function () {
+    it("verifies based on an OW req/resp pair", async function () {
 
         const attrs = await aliceRepo.all();
         const a1 = attrs.find(a => a.name === "a1");
@@ -77,10 +77,10 @@ describe("OWVerification end-to-end", () => {
         // Bob requests verification
         const verification = await verifier.verify(vReq1, vResp1);
 
-        expect(verification).toBe(true);
+        expect(verification).to.equal(true);
     })
 
-    test("Alice resolves the request properly", async function () {
+    it("Alice resolves the request properly", async function () {
 
         // Alice has a resolver
         const alicesResolver = new OWVerifyRequestResolver(config.aliceMid, aliceRepo);
@@ -92,8 +92,8 @@ describe("OWVerification end-to-end", () => {
         let vResponse;
         alicesHandler.setConsentCallback(async (result) => {
             vResponse = result.response;
-            expect(!!vResponse).toEqual(true) // Expected a response to be generated
-            expect(result.status).toEqual("success") // Expected request to be resolved successfully
+            expect(!!vResponse).to.equal(true, "Expected a response to be generated");
+            expect(result.status).to.equal("success", "Expected request to be resolved successfully");
             return true;
         })
 
@@ -109,12 +109,12 @@ describe("OWVerification end-to-end", () => {
 
         // Bob validates the response
         const errors = verifier.validateResponse(vReq1, vResponse);
-        expect(errors).toEqual([]) // Expected response validation to pass
+        expect(errors).to.deep.equal([], "Expected response validation to pass");
 
         // Bob requests verification
         const verification = await verifier.verify(vReq1, vResponse);
 
-        expect(verification).toBe(true);
+        expect(verification).to.equal(true);
     })
 
 });

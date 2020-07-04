@@ -1,28 +1,28 @@
 
 import { AsyncListPoller } from "../../src/ipv8/events/AsyncListPoller";
-// import { describe, expect, it } from "../tools";
+import { describe, expect, it } from "../tools";
 
 describe("AsyncListPoller", () => {
 
-    test("should return all elements first time", (done) => {
+    it("should return all elements first time", (done) => {
         const feed = [["a"]];
         const expected = ["a"];
         testPollOutput(feed, expected, done);
     })
 
-    test("should not return same element twice if persisted", (done) => {
+    it("should not return same element twice if persisted", (done) => {
         const feed = [["a"], ["a"], ["b"]];
         const expected = ["a", "b"];
         testPollOutput(feed, expected, done);
     })
 
-    test("should return same element twice if after reappearance", (done) => {
+    it("should return same element twice if after reappearance", (done) => {
         const feed = [["a"], ["b"], ["a"]];
         const expected = ["a", "b", "a"];
         testPollOutput(feed, expected, done);
     })
 
-    test("should work for objects", (done) => {
+    it("should work for objects", (done) => {
         const feed = [[{ x: { y: 10 } }], [{ x: { y: 10 } }], [{ z: 5 }]];
         const expected = [{ x: { y: 10 } }, { z: 5 }];
         testPollOutput<any>(feed, expected, done);
@@ -35,7 +35,7 @@ describe("AsyncListPoller", () => {
         poller.hook.on((e) => {
             try {
                 const exp = expected.shift();
-                expect(e).toEqual(exp);
+                expect(e).to.deep.equal(exp);
 
                 if (expected.length === 0) {
                     poller.stop();
