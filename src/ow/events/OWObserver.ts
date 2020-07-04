@@ -1,9 +1,9 @@
 import debug from "debug";
 import { IPv8Observer } from "../../../modules/browser/ipv8";
 import { AsyncListPoller } from "../../ipv8/events/AsyncListPoller";
-import { OpenWalletAPI, OWMessage } from "../api/OpenWalletAPI";
+import { OWAPI, OWMessage } from "../api/OWAPI";
 
-export class OpenWalletObserver extends IPv8Observer {
+export class OWObserver extends IPv8Observer {
 
     readonly msgPoller: AsyncListPoller<OWMessage>;
 
@@ -11,7 +11,7 @@ export class OpenWalletObserver extends IPv8Observer {
 
     protected log = debug("ow-ssi:ow:observer");
 
-    constructor(protected api: OpenWalletAPI, protected pollIntervalInMillis = 500, protected terminateOnDisconnect = false) {
+    constructor(protected api: OWAPI, protected pollIntervalInMillis = 500, protected terminateOnDisconnect = false) {
         super(api, pollIntervalInMillis, terminateOnDisconnect);
         this.msgPoller = new AsyncListPoller(() => this.api.getMessageInbox().catch(this.handleOffline));
     }

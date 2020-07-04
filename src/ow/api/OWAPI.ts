@@ -7,7 +7,7 @@ const log = debug("ow-ssi:ow:api");
 /**
  * A client for the OpenWallet API, which extends the IPv8 Attestation API
  */
-export class OpenWalletAPI extends IPv8API {
+export class OWAPI extends IPv8API {
 
     /** Get all messages in the inbox */
     public getMessageInbox(): Promise<OWMessage[]> {
