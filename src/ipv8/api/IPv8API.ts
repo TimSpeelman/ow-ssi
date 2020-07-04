@@ -1,4 +1,4 @@
-import { AxiosError, AxiosInstance, default as axios } from 'axios';
+import { AxiosInstance, default as axios } from 'axios';
 import debug from "debug";
 import { b64encode } from '../../util/b64';
 import { b64ToHex } from "../../util/b64ToHex";
@@ -17,6 +17,8 @@ export class IPv8API {
 
     constructor(protected baseURL: string) {
         this.api = axios.create({ baseURL });
+        // Set up default error handling
+        this.api.interceptors.response.use((r) => r, (e) => { throw toHttpError(e) });
     }
 
     /** Get my Member ID */
@@ -24,7 +26,6 @@ export class IPv8API {
         return this.api
             .get('/me')
             .then(res => res.data.mid)
-            .catch(this.handleError.bind(this))
     }
 
     /** Check that this IPv8 instance is online */
@@ -39,7 +40,6 @@ export class IPv8API {
         return this.api
             .get('/attestation?type=peers')
             .then(res => res.data)
-            .catch(this.handleError.bind(this))
     }
 
     /** Make sure we look for a particular peer */
@@ -52,7 +52,6 @@ export class IPv8API {
         return this.api
             .get(`/dht/peers/${b64ToHex(mid_b64)}`)
             .then((response: any) => response.data.peers)
-            .catch(this.handleError.bind(this))
     }
 
     /** Request an attestation */
@@ -72,7 +71,6 @@ export class IPv8API {
         return this.api
             .post(`/attestation?${queryString(query)}`)
             .then(res => res.data.success)
-            .catch(this.handleError.bind(this))
     }
 
     /** List all attestation requests we received */
@@ -86,7 +84,6 @@ export class IPv8API {
                     metadata
                 }))
             )
-            .catch(this.handleError.bind(this))
     }
 
     /** Make an attestation */
@@ -102,7 +99,6 @@ export class IPv8API {
         return this.api
             .post(`/attestation?${queryString(query)}`)
             .then(res => res.data)
-            .catch(this.handleError.bind(this))
     }
 
     /** List all created attestations */
@@ -119,7 +115,6 @@ export class IPv8API {
                     })
                 )
             )
-            .catch(this.handleError.bind(this))
     }
 
     /** Request a verification */
@@ -144,7 +139,6 @@ export class IPv8API {
         return this.api
             .post(`/attestation?${queryString(query)}`, '')
             .then(response => response.data.success)
-            .catch(this.handleError.bind(this))
     }
 
     /** Get all outstanding verification requests we received from peers */
@@ -155,7 +149,6 @@ export class IPv8API {
                 res.data.map(([mid_b64, attribute_name]: string[]): InboundVerificationRequest =>
                     ({ mid_b64, attribute_name }))
             )
-            .catch(this.handleError.bind(this))
     }
 
 
@@ -172,7 +165,6 @@ export class IPv8API {
         return this.api
             .post(`/attestation?${queryString(query)}`)
             .then(res => res.data.success)
-            .catch(this.handleError.bind(this))
     }
 
     /** List all verification outputs (pending and completed) */
@@ -190,10 +182,6 @@ export class IPv8API {
                         return [...output, ...pairs];
                     }, [])
             )
-            .catch(this.handleError.bind(this))
     }
 
-    protected handleError(error: AxiosError) {
-        throw toHttpError(error);
-    }
 }

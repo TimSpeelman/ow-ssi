@@ -14,7 +14,6 @@ export class OpenWalletAPI extends IPv8API {
         return this.api
             .get('/msg/inbox')
             .then(res => res.data)
-            .catch(this.handleError.bind(this))
     }
 
     /** Send a message to a peer */
@@ -22,7 +21,6 @@ export class OpenWalletAPI extends IPv8API {
         return this.api
             .get('/msg/send?' + queryString({ message, mid }))
             .then(res => res.data.mid)
-            .catch(this.handleError.bind(this))
     }
 
     /** List all peers' mids that are in this community */
@@ -30,7 +28,6 @@ export class OpenWalletAPI extends IPv8API {
         return this.api
             .get('/msg/peers')
             .then(res => res.data)
-            .catch(this.handleError.bind(this))
     }
 
 }
