@@ -10,7 +10,7 @@ const log = debug("ow-ssi:ow:api");
 export class OpenWalletAPI extends IPv8API {
 
     /** Get all messages in the inbox */
-    public getMessageInbox(): Promise<Message[]> {
+    public getMessageInbox(): Promise<OWMessage[]> {
         return this.api
             .get('/msg/inbox')
             .then(res => res.data)
@@ -32,7 +32,7 @@ export class OpenWalletAPI extends IPv8API {
 
 }
 
-interface Message {
+export interface OWMessage {
     sender_mid_b64: string
     message: string
     received_at: number

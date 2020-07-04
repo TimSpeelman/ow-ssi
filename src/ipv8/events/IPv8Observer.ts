@@ -3,8 +3,6 @@ import { IPv8API } from '../api/IPv8API';
 import { Attestation, InboundAttestationRequest, InboundVerificationRequest, VerificationOutputPair } from "../api/types";
 import { AsyncListPoller } from "./AsyncListPoller";
 
-const log = debug("ow-ssi:ipv8:observer");
-
 /** Observes the IPv8 API for new information and fires corresponding events */
 export class IPv8Observer {
 
@@ -23,8 +21,9 @@ export class IPv8Observer {
     public reconnecting = false;
     protected active = false;
 
-    constructor(private api: IPv8API, private pollIntervalInMillis = 500, private terminateOnDisconnect = false) {
+    protected log = debug("ow-ssi:ipv8:observer");
 
+    constructor(protected api: IPv8API, protected pollIntervalInMillis = 500, protected terminateOnDisconnect = false) {
 
         this.peerPoller = new AsyncListPoller(() => this.api.listPeers().catch(this.handleOffline));
         this.attReqPoller = new AsyncListPoller(() => this.api.listAttestationRequests().catch(this.handleOffline));
@@ -62,7 +61,7 @@ export class IPv8Observer {
     }
 
     public start() {
-        log("Observer starting");
+        this.log("Observer starting");
         const ms = this.pollIntervalInMillis;
         this.active = true;
         this.peerPoller.start(ms);
@@ -75,11 +74,11 @@ export class IPv8Observer {
     /** Deactivates */
     public stop() {
         if (this.active) {
-            log("Observer stopped");
+            this.log("Observer stopped");
             this.active = false;
             this.stopPollers();
         } else {
-            log("Observer already stopped");
+            this.log("Observer already stopped");
         }
     }
 
@@ -96,10 +95,10 @@ export class IPv8Observer {
         if (this.active && !this.reconnecting) { // handle this only once
 
             if (this.terminateOnDisconnect) {
-                log("IPv8 seems to be offline, terminating.");
+                this.log("IPv8 seems to be offline, terminating.");
                 this.stopPollers();
             } else {
-                log("IPv8 seems to be offline, attempting to reconnect.");
+                this.log("IPv8 seems to be offline, attempting to reconnect.");
                 this.stopPollers();
                 this.attemptToReconnect();
             }
@@ -113,10 +112,10 @@ export class IPv8Observer {
     protected attemptToReconnect() {
         this.reconnecting = true;
         setTimeout(async () => {
-            log("Reconnecting..")
+            this.log("Reconnecting..")
             if (await this.api.verifyOnline()) {
                 if (this.active) {
-                    log("Reconnected to IPv8, polls restarting.");
+                    this.log("Reconnected to IPv8, polls restarting.");
                     this.start();
                 }
             } else if (this.active) {

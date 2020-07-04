@@ -1,5 +1,5 @@
 import { OpenWalletAPI } from "../../../src/ow/api/OpenWalletAPI";
-import { cancelAfter, cancellable } from "../../../src/util/cancellable";
+import { OpenWalletObserver } from "../../../src/ow/events/OpenWalletObserver";
 import { describe, expect, it } from "../../tools";
 
 const alicePort = 10001;
@@ -10,8 +10,10 @@ describe("OpenWallet Messaging end-to-end", function () {
     const alice = new OpenWalletAPI(`http://localhost:${alicePort}`);
     const bob = new OpenWalletAPI(`http://localhost:${bobPort}`);
 
+
     let alicesMid: string;
     let bobsMid: string;
+    let bobObserver: OpenWalletObserver;
 
     this.beforeAll(async () => {
         if (!await alice.verifyOnline()) throw new Error("API is Offline")
@@ -20,27 +22,20 @@ describe("OpenWallet Messaging end-to-end", function () {
         bobsMid = await bob.getMyId();
     })
 
-    it("can send a message from alice to chris", async function () {
+    this.beforeEach(() => {
+        bobObserver = new OpenWalletObserver(bob, 100);
+        bobObserver.start();
+    })
 
-        await alice.sendMessage(bobsMid, "Hi Bob!");
+    it("can send a message from alice to chris", function (done) {
 
-        const iv = 100;
-        const pollForMessage = cancellable((onCancel) =>
-            new Promise(resolve => {
-                const i = setInterval(async () => {
-                    const inbox = await bob.getMessageInbox();
-                    if (inbox.length > 0) {
-                        resolve(inbox[0])
-                    }
-                }, iv)
-                onCancel(() => clearInterval(i));
-            }))
-        const timeout = 1000; // ms
+        alice.sendMessage(bobsMid, "Hi Bob!").catch(done);
 
-        const message = await cancelAfter(timeout)(pollForMessage).promise;
-
-        expect(message).to.have.property("message", "Hi Bob!");
-        expect(message).to.have.property("sender_mid_b64", alicesMid);
+        bobObserver.onMessageFound((message) => {
+            expect(message).to.have.property("message", "Hi Bob!");
+            expect(message).to.have.property("sender_mid_b64", alicesMid);
+            done();
+        })
 
     })
 
