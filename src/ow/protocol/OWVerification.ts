@@ -75,6 +75,8 @@ export class OWVerification {
 
     get canBeVerified() { return this.status === OWVerificationStatus.ACCEPTED }
 
+    get isVerified() { return this.status === OWVerificationStatus.VERIFIED }
+
     constructor(
         public verifierId: string,
         public subjectId: string,

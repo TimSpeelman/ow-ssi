@@ -3,6 +3,7 @@ import { IPv8Observer } from "../../../modules/browser/ipv8";
 import { AsyncListPoller } from "../../ipv8/events/AsyncListPoller";
 import { OWAPI, OWMessage } from "../api/OWAPI";
 
+// TODO Perhaps composition is better than inheritance here
 export class OWObserver extends IPv8Observer {
 
     readonly msgPoller: AsyncListPoller<OWMessage>;

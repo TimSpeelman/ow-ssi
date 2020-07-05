@@ -1,6 +1,7 @@
 import debug from "debug";
 import { IPv8API } from "../../ipv8/api/IPv8API";
 import { queryString } from "../../util/queryString";
+import { OWAttestedAttr } from "../protocol/types";
 
 
 /**
@@ -9,6 +10,18 @@ import { queryString } from "../../util/queryString";
 export class OWAPI extends IPv8API {
 
     protected log = debug("ow-ssi:ow:api");
+
+    /** Get all attributes */
+    public listAttributes(): Promise<OWAttestedAttr[]> {
+        return this.api
+            .get("/attributes").then((d) => d.data)
+    }
+
+    /** Store an attribute */
+    public storeAttribute(attribute: OWAttestedAttr) {
+        return this.api
+            .post("/attributes", attribute)
+    }
 
     /** Get all messages in the inbox */
     public getMessageInbox(): Promise<OWMessage[]> {

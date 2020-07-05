@@ -19,6 +19,7 @@ export const KVKRecipes: Dict<RecipeConfiguration> = {
                 },
             }],
             verify_request: {
+                type: "OWVerifyRequest",
                 verifier_id: kvkServerPeer.mid_b64, // TODO not so nice
                 attributes: [
                     {

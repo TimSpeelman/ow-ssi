@@ -30,7 +30,6 @@ export class IPv8Observer {
         this.attPoller = new AsyncListPoller(() => this.api.listAttestations().catch(this.handleOffline));
         this.verifReqPoller = new AsyncListPoller(() => this.api.listVerificationRequests().catch(this.handleOffline));
         this.verifPoller = new AsyncListPoller(() => this.api.listVerificationOutputs().catch(this.handleOffline));
-        this.verifPoller.hook.on((result) => console.log("VRESULT", result))
     }
 
     get isRunning() {
@@ -55,7 +54,7 @@ export class IPv8Observer {
                 timer = setTimeout(() => {
                     readyPoller.stop();
                     done = true;
-                    reject();
+                    reject(new Error(`IPv8 not ready, waited ${timeoutInMillis} millis.`));
                 }, timeoutInMillis);
             }
         })

@@ -1,4 +1,7 @@
+import { Dict } from "../../types/Dict";
+
 export interface OWVerifyRequest {
+    type: "OWVerifyRequest",
     verifier_id: string;
     ref?: string;
     attributes: OWVerifyReqAttr[];
@@ -22,6 +25,7 @@ export interface OWAttrConstraint { // FIXME
 }
 
 export interface OWVerifyResponse {
+    type: "OWVerifyResponse",
     ref?: string;
     subject_id: string;
     request_hash: string;
@@ -49,11 +53,13 @@ export interface OWAttestOfferAttr {
     value: string;
 }
 
-export interface AttestedAttr {
+export interface OWAttestedAttr {
     name: string;
     value: string;
     format: string;
     hash: string;
+    time: number;
+    title: Dict<string>;
     signer_mid_b64: string;
     metadata: any;
 }

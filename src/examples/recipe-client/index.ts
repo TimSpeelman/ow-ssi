@@ -1,6 +1,7 @@
 import Axios from "axios";
+import { IOWAttributeRepository } from "../../../modules/browser/ow";
 import { IPv8Service } from "../../ipv8/IPv8Service";
-import { OWAttributeRepository } from "../../ow/OWAttributeRepository";
+import { OWMemoryAttributeRepository } from "../../ow/OWMemoryAttributeRepository";
 import { OWAttestee } from "../../ow/protocol/OWAttestee";
 import { OWVerifiee } from "../../ow/protocol/OWVerifiee";
 import { OWVerifyRequestResolver } from "../../ow/resolution/OWVerifyRequestResolver";
@@ -22,7 +23,7 @@ class Wallet {
 
     public verifiee: OWVerifiee;
     public attestee: OWAttestee;
-    public repo: OWAttributeRepository;
+    public repo: IOWAttributeRepository;
     public resolver: OWVerifyRequestResolver;
     public recipeClient: RecipeClient;
 
@@ -36,7 +37,7 @@ class Wallet {
 
         this.verifiee = new OWVerifiee(me.verifieeService);
         this.attestee = new OWAttestee(me.attesteeService);
-        this.repo = new OWAttributeRepository();
+        this.repo = new OWMemoryAttributeRepository();
         this.resolver = new OWVerifyRequestResolver(myId, this.repo);
         this.recipeClient = new RecipeClient(myId, this.verifiee, this.attestee);
     }

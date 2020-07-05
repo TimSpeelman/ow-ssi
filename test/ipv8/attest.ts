@@ -1,6 +1,6 @@
 import { AttesteeService } from "../../src/ipv8/services/AttesteeService";
 import { AttesterService } from "../../src/ipv8/services/AttesterService";
-import { AttestedAttr } from "../../src/ow/protocol/types";
+import { OWAttestedAttr } from "../../src/ow/protocol/types";
 
 export async function attest(
     attester: AttesterService,
@@ -8,7 +8,7 @@ export async function attest(
     attester_id: string,
     attestee_id: string,
     attributes: Array<{ attribute_name: string, attribute_value: string }>
-): Promise<AttestedAttr[]> {
+): Promise<OWAttestedAttr[]> {
 
     const validUntil = Date.now() + 10000
     attester.stageAttestation(attestee_id, attributes, validUntil);
@@ -21,6 +21,8 @@ export async function attest(
         hash: a.attribute_hash,
         name: a.attribute_name,
         metadata: a.metadata,
+        time: 0, // FIXME
+        title: {}, // FIXME
         signer_mid_b64: a.signer_mid_b64,
         value: attributes[i].attribute_value,
     }))

@@ -16,7 +16,7 @@ export class OWMessageDispatch {
     protected register() {
         this.observer.onMessageFound((msg) => {
             if (!this.handlers.find(h => h(msg))) {
-                throw new Error("Unhandled Message")
+                console.warn("Warning: Unhandled Message from " + msg.sender_mid_b64)
             }
         })
     }

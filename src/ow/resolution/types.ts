@@ -1,7 +1,7 @@
-import { AttestedAttr, OWVerifyReqAttr, OWVerifyRequest, OWVerifyRespAttr, OWVerifyResponse } from "../protocol/types";
+import { OWAttestedAttr, OWVerifyReqAttr, OWVerifyRequest, OWVerifyRespAttr, OWVerifyResponse } from "../protocol/types";
 
 export interface IAttributeStore {
-    all(): Promise<AttestedAttr[]>
+    all(): Promise<OWAttestedAttr[]>
 }
 
 export interface ResolutionResult {
@@ -15,7 +15,7 @@ export interface ResolutionAttributeResult {
     status: "success" | "ambiguous" | "missing";
     request: OWVerifyReqAttr;
     responses: OWVerifyRespAttr[];
-    results: AttestedAttr[];
+    results: OWAttestedAttr[];
 }
 
 export interface IVerifyRequestResolver {

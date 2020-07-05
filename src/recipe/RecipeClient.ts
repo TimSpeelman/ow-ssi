@@ -1,6 +1,6 @@
 import { OWAttestee } from "../ow/protocol/OWAttestee";
 import { OWVerifiee } from "../ow/protocol/OWVerifiee";
-import { AttestedAttr, OWAttestOffer, OWVerifyResponse } from "../ow/protocol/types";
+import { OWAttestedAttr, OWAttestOffer, OWVerifyResponse } from "../ow/protocol/types";
 import { Recipe, RecipeRequest } from "./types";
 
 /**
@@ -85,7 +85,7 @@ export class RecipeClientProcess {
     }
 
     /** Request attestatoin based on this offer. */
-    public requestAttestation(offer: OWAttestOffer): Promise<AttestedAttr[]> {
+    public requestAttestation(offer: OWAttestOffer): Promise<OWAttestedAttr[]> {
         return this.attestee.requestAttestationByOffer(offer);
     }
 

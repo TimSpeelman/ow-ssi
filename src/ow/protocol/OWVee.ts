@@ -33,6 +33,7 @@ export class OWVee {
     handleRequestMessage(message: OWMessage) {
         try {
             const data = JSON.parse(message.message);
+            if (data.type !== "OWVerifyRequest") { return false }
             const validationError = OWVerifyRequestValidator(data);
             if (validationError) {
                 this.log(`WARN: Incoming OWVerifyRequest validation error: ${validationError}`)

@@ -4,7 +4,7 @@ import { IVerifierService } from "../../ipv8/services/types/IVerifierService";
 import { Dict } from "../../types/Dict";
 import { Hook } from "../../util/Hook";
 import { OWAPI, OWMessage } from "../api/OWAPI";
-import { OWVerification, OWVerifyError } from "./OWVerification";
+import { OWVerification, OWVerificationStatus, OWVerifyError } from "./OWVerification";
 import { OWVerifyResponseValidator } from "./syntax-validation";
 import { OWVerifyRequest, OWVerifyResponse } from "./types";
 
@@ -33,11 +33,32 @@ export class OWVer {
         protected api: OWAPI,
         protected ipv8verifier: IVerifierService) { }
 
+    verify(request: OWVerifyRequest): Promise<OWVerification> {
+        return new Promise((resolve, reject) => {
+            const session = this.newSessionFromRequest(request);
+
+            this.sendRequest(session)
+                .then((success) => !success && reject(new Error("Could not send request")))
+                .catch(reject);
+
+            session.statusHook.on((status) => {
+                // Automatically verify when the verifiee accepts the request
+                if (status === OWVerificationStatus.ACCEPTED) {
+                    this.verifySession(session).catch(reject);
+                }
+
+                // Return the result
+                if (status === OWVerificationStatus.VERIFIED) {
+                    resolve(session);
+                }
+            })
+        })
+    }
+
     newSessionFromRequest(request: OWVerifyRequest) {
         const session = new OWVerification(this.myId, request.subject_id, request);
         const id = session.request.ref; // FIXME
         if (id in this.sessions) {
-            throw new Error(`Session with id '${id}' already exists..`)
         }
         this.sessions[id] = session;
         this.newSessionHook.fire(session);
@@ -54,11 +75,13 @@ export class OWVer {
         if (couldSend) {
             session.requested();
         }
+        return couldSend;
     }
 
     handleResponseMessage(message: OWMessage) {
         try {
             const data = JSON.parse(message.message);
+            if (data.type !== "OWVerifyResponse") { return false }
             const validationError = OWVerifyResponseValidator(data);
             if (validationError) {
                 this.log(`WARN: Incoming OWVerifyResponse validation error: ${validationError}`)

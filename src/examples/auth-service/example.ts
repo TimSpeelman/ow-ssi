@@ -45,11 +45,13 @@ const ipv8service = new IPv8Service(ipv8URL, config.pollInterval);
 ipv8service.start();
 
 const nameRequest: OWVerifyRequest = {
+    type: "OWVerifyRequest",
     ref: "abc",
     verifier_id: ipv8Config.mid_b64,
     attributes: [{ ref: "thename", name: "name", format: "id_metadata", include_value: true },],
 };
 const ageRequest: OWVerifyRequest = {
+    type: "OWVerifyRequest",
     ref: "abc",
     verifier_id: ipv8Config.mid_b64,
     attributes: [{ ref: "theage", name: "age", format: "id_metadata", include_value: true },],

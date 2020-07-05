@@ -4,7 +4,7 @@ import cors from "cors";
 import express, { Request, Response } from "express";
 import { VerifyHttpClient } from "../../auth/HttpClient";
 import { IPv8Service } from "../../ipv8/IPv8Service";
-import { OWAttributeRepository } from "../../ow/OWAttributeRepository";
+import { OWMemoryAttributeRepository } from "../../ow/OWMemoryAttributeRepository";
 import { OWAttestee } from "../../ow/protocol/OWAttestee";
 import { OWVerifiee } from "../../ow/protocol/OWVerifiee";
 import { OWVerifyRequestResolver } from "../../ow/resolution/OWVerifyRequestResolver";
@@ -15,7 +15,7 @@ class DummyWallet {
 
     public verifiee: OWVerifiee;
     public attestee: OWAttestee;
-    public repo: OWAttributeRepository;
+    public repo: OWMemoryAttributeRepository;
     public resolver: OWVerifyRequestResolver;
 
     constructor(
@@ -26,7 +26,7 @@ class DummyWallet {
 
         this.verifiee = new OWVerifiee(me.verifieeService);
         this.attestee = new OWAttestee(me.attesteeService);
-        this.repo = new OWAttributeRepository();
+        this.repo = new OWMemoryAttributeRepository();
         this.resolver = new OWVerifyRequestResolver(myId, this.repo);
     }
 

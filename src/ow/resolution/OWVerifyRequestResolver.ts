@@ -28,6 +28,7 @@ export class OWVerifyRequestResolver implements IVerifyRequestResolver {
         const status = attributes.some(a => a.status !== "success") ? "unresolved" : "success";
 
         const response: OWVerifyResponse = {
+            type: "OWVerifyResponse",
             ref: request.ref,
             subject_id: this.myId,
             request_hash: "FIXME",
