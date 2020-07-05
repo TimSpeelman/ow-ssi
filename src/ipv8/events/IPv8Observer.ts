@@ -30,6 +30,7 @@ export class IPv8Observer {
         this.attPoller = new AsyncListPoller(() => this.api.listAttestations().catch(this.handleOffline));
         this.verifReqPoller = new AsyncListPoller(() => this.api.listVerificationRequests().catch(this.handleOffline));
         this.verifPoller = new AsyncListPoller(() => this.api.listVerificationOutputs().catch(this.handleOffline));
+        this.verifPoller.hook.on((result) => console.log("VRESULT", result))
     }
 
     get isRunning() {

@@ -2,12 +2,13 @@ import debug from "debug";
 import { IPv8API } from "../../ipv8/api/IPv8API";
 import { queryString } from "../../util/queryString";
 
-const log = debug("ow-ssi:ow:api");
 
 /**
  * A client for the OpenWallet API, which extends the IPv8 Attestation API
  */
 export class OWAPI extends IPv8API {
+
+    protected log = debug("ow-ssi:ow:api");
 
     /** Get all messages in the inbox */
     public getMessageInbox(): Promise<OWMessage[]> {
@@ -18,9 +19,10 @@ export class OWAPI extends IPv8API {
 
     /** Send a message to a peer */
     public sendMessage(mid: string, message: string): Promise<boolean> {
+        this.log(`Sending message to ${mid}: ${message}`);
         return this.api
             .get('/msg/send?' + queryString({ message, mid }))
-            .then(res => res.data.mid)
+            .then(res => res.data.success)
     }
 
     /** List all peers' mids that are in this community */

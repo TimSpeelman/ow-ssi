@@ -6,12 +6,12 @@ import { toHttpError } from "../../util/HttpError";
 import { queryString } from '../../util/queryString';
 import { Attestation, InboundAttestationRequest, InboundVerificationRequest, Peer, VerificationOutputMap, VerificationOutputPair } from "./types";
 
-const log = debug("ow-ssi:ipv8:api");
-
 /**
  * A client for the IPv8 Attestation API.
  */
 export class IPv8API {
+
+    protected log = debug("ow-ssi:ipv8:api");
 
     protected api: AxiosInstance
 
@@ -44,7 +44,7 @@ export class IPv8API {
 
     /** Make sure we look for a particular peer */
     public connectPeer(mid_b64: string): Promise<Peer[]> {
-        log("ConnectPeer", this.baseURL, mid_b64);
+        this.log("ConnectPeer", this.baseURL, mid_b64);
 
         if (!mid_b64 || mid_b64.length === 0) {
             throw new Error("Not a valid mid");
@@ -54,7 +54,7 @@ export class IPv8API {
             .then((response: any) => response.data.peers)
     }
 
-    /** Request an attestation */
+    /** Request an attestation (times out after 120 seconds) */
     public requestAttestation(
         mid_b64: string,
         attribute_name: string,
@@ -66,7 +66,7 @@ export class IPv8API {
             attribute_name,
             id_format
         }
-        log("RequestAttestation", this.baseURL, query);
+        this.log("RequestAttestation", this.baseURL, query);
 
         return this.api
             .post(`/attestation?${queryString(query)}`)
@@ -94,7 +94,7 @@ export class IPv8API {
             attribute_name,
             attribute_value: b64encode(attribute_value)
         }
-        log("Attest", this.baseURL, query);
+        this.log("Attest", this.baseURL, query);
 
         return this.api
             .post(`/attestation?${queryString(query)}`)
@@ -117,7 +117,7 @@ export class IPv8API {
             )
     }
 
-    /** Request a verification */
+    /** Request a verification (times out after 120 seconds) */
     public requestVerification(
         mid_b64: string,
         attribute_hash_b64: string,
@@ -134,7 +134,7 @@ export class IPv8API {
             id_metadata: b64encode(JSON.stringify(id_metadata_obj))
         }
 
-        log("RequestVerify", this.baseURL, query);
+        this.log("RequestVerify", this.baseURL, query);
 
         return this.api
             .post(`/attestation?${queryString(query)}`, '')
@@ -160,7 +160,7 @@ export class IPv8API {
             attribute_name
         }
 
-        log("AllowVerify", this.baseURL, query);
+        this.log("AllowVerify", this.baseURL, query);
 
         return this.api
             .post(`/attestation?${queryString(query)}`)

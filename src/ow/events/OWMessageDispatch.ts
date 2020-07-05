@@ -24,3 +24,7 @@ export class OWMessageDispatch {
 }
 
 export type MessageHandler = (message: OWMessage) => boolean;
+
+export interface OWMessageHandler {
+    handleMessage: MessageHandler;
+}
