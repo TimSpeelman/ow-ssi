@@ -1,4 +1,5 @@
 export * from "../../src/ow/IOWAttributeRepository";
+export * from "../../src/ow/OWAgent";
 export * from "../../src/ow/OWMemoryAttributeRepository";
 export * from "../../src/ow/OWVerifyRequestHandler";
 export * from "../../src/ow/protocol/OWAttestee";

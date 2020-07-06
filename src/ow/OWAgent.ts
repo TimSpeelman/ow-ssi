@@ -1,4 +1,4 @@
-import { OWVerifyRequestResolver, OWVerifyResponse, ResolutionResult } from "../../modules/browser/ow";
+import { OWAttestee, OWAttester, OWVerifiee, OWVerifier, OWVerifyRequestResolver, OWVerifyResponse, ResolutionResult } from "../../modules/browser/ow";
 import { IPv8Service } from "../ipv8/IPv8Service";
 import { OWAPI } from "./api/OWAPI";
 import { OWMessageDispatch } from "./events/OWMessageDispatch";
@@ -22,8 +22,12 @@ export class OWAgent {
     public repo: IOWAttributeRepository;
     public resolver: OWVerifyRequestResolver;
     public dispatch: OWMessageDispatch;
+    public attester: OWAttester;
+    public attestee: OWAttestee;
+    public verifier: OWVerifier;
+    public verifiee: OWVerifiee;
 
-    public verifyRequestHandler: OWVerifyRequestHandler = () => Promise.resolve(false);
+    public verifyRequestHandler: OWNewVerifyRequestHandler = () => Promise.resolve(false);
 
     /** By default: automatically verify once the response satisfies the request */
     public verifyResponseHandler: OWVerifyResponseHandler = () => Promise.resolve(true);
@@ -37,6 +41,11 @@ export class OWAgent {
         this.dispatch = new OWMessageDispatch(this.owObserver);
         this.dispatch.addHandler((message) => this.vee.handleRequestMessage(message))
         this.dispatch.addHandler((message) => this.ver.handleResponseMessage(message))
+
+        this.attester = new OWAttester(this.service.attesterService)
+        this.attestee = new OWAttestee(this.service.attesteeService)
+        this.verifier = new OWVerifier(this.service.verifierService)
+        this.verifiee = new OWVerifiee(this.service.verifieeService)
     }
 
     async start(timeoutInMillis = 3000) {
@@ -78,7 +87,7 @@ export class OWAgent {
 }
 
 
-export type OWVerifyRequestHandler = (session: OWVerification, resolutionResult: ResolutionResult) =>
+export type OWNewVerifyRequestHandler = (session: OWVerification, resolutionResult: ResolutionResult) =>
     Promise<OWVerifyResponse | false>
 
 /** The handler returns true if the verification should proceed */

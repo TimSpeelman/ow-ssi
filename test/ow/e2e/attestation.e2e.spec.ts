@@ -1,56 +1,46 @@
-import { IPv8Service } from "../../../src/ipv8/IPv8Service";
-import { OWAttestee } from "../../../src/ow/protocol/OWAttestee";
-import { OWAttester } from "../../../src/ow/protocol/OWAttester";
+import { OWAgent } from "../../../src/ow/OWAgent";
 import { OWAttestOffer } from "../../../src/ow/protocol/types";
-import { loadTemporaryIPv8Configuration } from "../../../src/util/ipv8conf";
 import { describe, expect, it } from "../../tools";
 
-const aliceConf = loadTemporaryIPv8Configuration('test-alice');
-const chrisConf = loadTemporaryIPv8Configuration('test-bob');
+const alicePort = 10001;
+const chrisPort = 10002;
 
-const config = {
-    aliceUrl: `http://localhost:${aliceConf.port}`,
-    aliceMid: aliceConf.mid_b64,
-    chrisUrl: `http://localhost:${chrisConf.port}`,
-    chrisMid: chrisConf.mid_b64,
-    pollInterval: 200,
-}
+describe("OWAttestation end-to-end", function () {
 
-describe("OWAttestation end-to-end", () => {
+    const alice = new OWAgent(`http://localhost:${alicePort}`);
+    const chris = new OWAgent(`http://localhost:${chrisPort}`);
 
-    const alice = new IPv8Service(config.aliceUrl, config.pollInterval);
-    const chris = new IPv8Service(config.chrisUrl, config.pollInterval);
-    alice.start();
-    chris.start();
+    this.beforeAll(async function () {
+        await alice.start(500);
+        await chris.start(500);
+    })
 
-    const attestee = new OWAttestee(alice.attesteeService);
-    const attester = new OWAttester(chris.attesterService);
-
-    it("attests based on an OW req/resp pair", async function () {
+    it("attests based on an OW req/resp pair", function (done) {
 
         // Chris creates an Attestation Offer
         const offer: OWAttestOffer = {
             ref: "FIXME",
-            attester_id: config.chrisMid,
+            attester_id: chris.mid,
             attributes: [
                 { name: "a1", format: "id_metadata", value: "v1" },
                 { name: "a2", format: "id_metadata", value: "v2" },
             ],
             expiresAtTimeInMillis: 1,
-            subject_id: config.aliceMid,
+            subject_id: alice.mid,
         }
 
         // Chris stages his offer
-        attester.attestByOffer(offer);
+        chris.attester.attestByOffer(offer).catch(done);
 
         // Chris sends <OW:AttestOffer> to Alice (via some transport)
 
         // Alice handles the offer by requesting IPv8 attestation
-        const results = await attestee.requestAttestationByOffer(offer);
-
-        expect(results).to.have.length(2, "Expected two attestations");
-        expect(results[0].name).to.equal("a1");
-        expect(results[1].name).to.equal("a2");
+        alice.attestee.requestAttestationByOffer(offer).then((results) => {
+            expect(results).to.have.length(2, "Expected two attestations");
+            expect(results[0].name).to.equal("a1");
+            expect(results[1].name).to.equal("a2");
+            done();
+        }).catch(done)
 
     })
 
