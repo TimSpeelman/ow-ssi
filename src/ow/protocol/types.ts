@@ -9,6 +9,7 @@ export interface OWVerifyRequest {
     reason?: string;
     metadata?: any;
     http_return_address?: string;
+    overlay?: string;
 }
 
 export interface OWVerifyReqAttr {
@@ -30,6 +31,8 @@ export interface OWVerifyResponse {
     subject_id: string;
     request_hash: string;
     attributes: OWVerifyRespAttr[];
+    overlay?: string;
+    metadata?: any;
 }
 
 export interface OWVerifyRespAttr {
@@ -45,12 +48,16 @@ export interface OWAttestOffer {
     subject_id?: string;
     attributes: OWAttestOfferAttr[];
     expiresAtTimeInMillis: number;
+    overlay?: string;
+    metadata?: any;
 }
 
 export interface OWAttestResponse {
     type: "OWAttestResponse";
     ref: string;
     answer: boolean;
+    overlay?: string;
+    metadata?: any;
 }
 
 export interface OWAttestOfferAttr {
