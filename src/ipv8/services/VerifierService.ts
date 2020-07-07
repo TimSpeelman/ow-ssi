@@ -3,7 +3,7 @@ import { IPv8API } from "../api/IPv8API";
 import { IPv8Observer } from "../events/IPv8Observer";
 import { PeerService } from "./PeerService";
 import { AttributeWithHash } from './types/Attribute';
-import { IVerifierService } from './types/IVerifierService';
+import { IVerifierService, MultiVerifyResult, VerifyResult } from './types/IVerifierService';
 
 const log = debug("ow-ssi:ipv8:verifiee");
 
@@ -22,11 +22,10 @@ export class VerifierService implements IVerifierService {
     public verify(
         mid_b64: string,
         credentials: AttributeWithHash[],
-    ): Promise<boolean> {
+    ): Promise<MultiVerifyResult> {
         this.requireIPv8Observer();
-        return Promise.all(credentials.map(c => this.verifySingle(mid_b64, c.attribute_hash, c.attribute_value))).then(
-            oks => !oks.some(ok => !ok)
-        )
+        return Promise.all(credentials.map(c => this.verifySingle(mid_b64, c.attribute_hash, c.attribute_value)))
+            .then(results => ({ success: !results.some(r => !r.success), results }))
     }
 
     /** Promises a boolean, true when the given attribute is verified on time, false if not. */
@@ -34,12 +33,14 @@ export class VerifierService implements IVerifierService {
         mid_b64: string,
         attribute_hash_b64: string,
         attribute_value: string
-    ): Promise<boolean> {
+    ): Promise<VerifyResult> {
         this.requireIPv8Observer();
 
         return new Promise(async (resolve, reject) => {
             try {
                 await this.peerService.findPeer(mid_b64);
+                const attestation = (await this.api.listAttestations(mid_b64))
+                    .find(a => a.attribute_hash === attribute_hash_b64)
 
                 log("Requesting verification", mid_b64, attribute_hash_b64, attribute_value);
                 this.api.requestVerification(mid_b64, attribute_hash_b64, attribute_value).catch(reject);
@@ -47,9 +48,9 @@ export class VerifierService implements IVerifierService {
                 this.observer.onVerification((verif) => {
                     if (verif.attribute_hash === attribute_hash_b64) {
                         if (verif.probability > this.verificationThreshold) {
-                            resolve(true);
+                            resolve({ success: true, attestation });
                         } else if (verif.probability > 0) {
-                            resolve(false);
+                            resolve({ success: false, attestation });
                             log(`Non-zero verification output did not pass the threshold of ${this.verificationThreshold}:`, verif)
                         }
                     }

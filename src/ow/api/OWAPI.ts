@@ -45,9 +45,17 @@ export class OWAPI extends IPv8API {
             .then(res => res.data)
     }
 
+    /** Delete a message */
+    public deleteMessage(id: string): Promise<boolean> {
+        this.log(`Deleting message ${id}.`);
+        return this.api
+            .delete('/msg/delete?' + queryString({ id }))
+            .then(res => res.data.success)
+    }
 }
 
 export interface OWMessage {
+    id: string
     sender_mid_b64: string
     message: string
     received_at: number

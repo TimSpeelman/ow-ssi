@@ -1,11 +1,14 @@
-import { OWMessage } from "../api/OWAPI";
+import debug from "debug";
+import { OWAPI, OWMessage } from "../api/OWAPI";
 import { OWObserver } from "./OWObserver";
 
 export class OWMessageDispatch {
 
     protected handlers: MessageHandler[] = [];
 
-    constructor(protected observer: OWObserver) {
+    protected log = debug("ow-ssi:msg-dispatch")
+
+    constructor(protected observer: OWObserver, protected api: OWAPI) {
         this.register();
     }
 
@@ -15,8 +18,17 @@ export class OWMessageDispatch {
 
     protected register() {
         this.observer.onMessageFound((msg) => {
-            if (!this.handlers.find(h => h(msg))) {
-                console.warn("Warning: Unhandled Message from " + msg.sender_mid_b64)
+            const handled = this.handlers.find(h => h(msg))
+            if (!handled) {
+                this.log("Warning: Unhandled Message from " + msg.sender_mid_b64 + ": ", msg)
+            } else {
+                this.api.deleteMessage(msg.id)
+                    .then((s) => {
+                        this.log(s ? `Deleted message ${msg.id}.` : `Could not delete message ${msg.id}.`)
+                    })
+                    .catch((e) => {
+                        this.log(`Error when deleting message ${msg.id}.`, e)
+                    })
             }
         })
     }

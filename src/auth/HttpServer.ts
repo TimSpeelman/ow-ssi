@@ -195,7 +195,7 @@ export class VerifyHttpServer {
                 .then((ok) => {
                     log("Verify successful")
                     this.sessions[uuid].result = {
-                        success: ok,
+                        success: ok.success,
                         response: ok ? response : undefined,
                     }
                     return ok;

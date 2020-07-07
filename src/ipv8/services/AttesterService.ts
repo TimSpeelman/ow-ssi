@@ -1,10 +1,11 @@
 import debug from "debug"
 import { Dict } from '../../types/Dict'
+import { Hook } from "../../util/Hook"
 import { IPv8API } from "../api/IPv8API"
 import { InboundAttestationRequest } from '../api/types'
 import { IPv8Observer } from "../events/IPv8Observer"
 import { Attribute } from './types/Attribute'
-import { IAttesterService, NonStagedRequestCallback, QueuedAttestation } from './types/IAttesterService'
+import { AttestationResult, IAttesterService, NonStagedRequestCallback, QueuedAttestation } from './types/IAttesterService'
 
 const log = debug("ow-ssi:ipv8:attester");
 
@@ -18,6 +19,8 @@ export class AttesterService implements IAttesterService {
     private queue: Dict<Dict<QueuedAttestation>> = {}
     private listeners: NonStagedRequestCallback[] = []
     private listener: NonStagedRequestCallback | null = null;
+
+    public attestationHook = new Hook<AttestationResult>();
 
     constructor(
         private api: IPv8API,
@@ -33,11 +36,16 @@ export class AttesterService implements IAttesterService {
     }
 
     /** Attest to a peer some attributes within a certain time */
-    public stageAttestation(mid_b64: string, attributes: Attribute[], validUntil: number): void {
+    public async stageAttestation(mid_b64: string, attributes: Attribute[], validUntil: number): Promise<void> {
         this.requireIPv8Observer();
+
         log("Staging attestation", { mid_b64, attributes, validUntil });
 
-        attributes.forEach(attribute => this.putGrant(mid_b64, { attribute, validUntil }))
+        attributes.forEach(async attribute => {
+            if (!await this.attestOpenRequests(mid_b64, attribute.attribute_name, attribute.attribute_value)) {
+                this.putGrant(mid_b64, { attribute, validUntil })
+            }
+        })
     }
 
     /** Check for a valid attestation in the queue, then attest and remove it. */
@@ -48,12 +56,11 @@ export class AttesterService implements IAttesterService {
         const att = this.getGrant(mid_b64, attribute_name)
         if (!att) {
             log("Attestation request is not staged");
-
             await this.handleNonStagedRequest(req)
         } else {
             log("Attestation request was staged, attesting..");
 
-            await this.api.attest(mid_b64, attribute_name, att.attribute.attribute_value)
+            await this.attest(mid_b64, attribute_name, att.attribute.attribute_value)
             this.removeGrant(mid_b64, attribute_name)
         }
     }
@@ -62,7 +69,7 @@ export class AttesterService implements IAttesterService {
         if (this.listener) {
             const result = await this.listener(req);
             if (result) {
-                return this.api.attest(req.mid_b64, req.attribute_name, result.attribute_value);
+                return this.attest(req.mid_b64, req.attribute_name, result.attribute_value);
             }
         } else {
             log("Ignored non-staged attestation request:", req);
@@ -72,6 +79,21 @@ export class AttesterService implements IAttesterService {
     protected getGrant(mid_b64: string, attribute_name: string): QueuedAttestation | null {
         this.removeExpiredGrants(mid_b64)
         return this.getGrantsByPeer(mid_b64).find(i => i.attribute.attribute_name === attribute_name)
+    }
+
+    protected async isAlreadyRequested(mid_b64: string, attribute_name: string) {
+        const requests = await this.api.listAttestationRequests();
+        const matchingReq = requests.find(r => r.attribute_name === attribute_name && r.mid_b64 === mid_b64);
+        return !!matchingReq;
+    }
+
+    protected async attestOpenRequests(mid_b64: string, name: string, value: string) {
+        if (await this.isAlreadyRequested(mid_b64, name)) {
+            log("Attesting to already received request", { mid_b64, name, value });
+            return this.attest(mid_b64, name, value).then(() => true)
+        } else {
+            return false;
+        }
     }
 
     protected removeGrant(mid_b64: string, attribute_name: string) {
@@ -101,5 +123,23 @@ export class AttesterService implements IAttesterService {
         if (!this.observer.isRunning) {
             throw new Error("IPv8 observer is not running");
         }
+    }
+
+    protected async attest(subject_mid, name: string, value: string) {
+        await this.api.attest(subject_mid, name, value);
+
+        const myId = await this.api.getMyId();
+        const subjectAtts = await this.api.listAttestations(subject_mid);
+        // TODO Dangerous assumption that latest attestation is the first one
+        // But also IPv8 listAttestations only lists the last (not all!) attestation with a given name
+        const attestation = subjectAtts.find(a => a.attribute_name === name && a.signer_mid_b64 === myId)
+        const attribute: Attribute = { attribute_value: value, attribute_name: name }
+
+        const result: AttestationResult = {
+            attestation,
+            attribute,
+            subject_mid,
+        }
+        this.attestationHook.fire(result);
     }
 }

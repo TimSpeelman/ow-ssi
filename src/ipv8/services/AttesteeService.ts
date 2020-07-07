@@ -1,3 +1,4 @@
+import debug from "debug";
 import { race } from "../../util/race";
 import { IPv8API } from "../api/IPv8API";
 import { Attestation } from "../api/types";
@@ -9,6 +10,8 @@ import { AttestationSpec, IAttesteeService } from "./types/IAttesteeService";
  * The AttesteeService requests attestation and awaits the result
  */
 export class AttesteeService implements IAttesteeService {
+
+    protected log = debug("ow-ssi:ipv8:attestee");
 
     constructor(
         private api: IPv8API,
@@ -29,6 +32,7 @@ export class AttesteeService implements IAttesteeService {
             const r = await this.requestAttestationForOne(mid_b64, c.attribute_name, c.id_format, timeoutPerAttestationInMillis);
             results.push(r);
         }
+        this.log(`Received ${credentials.length} attestations from ${mid_b64}. Complete.`);
         return results;
     }
 
@@ -42,13 +46,14 @@ export class AttesteeService implements IAttesteeService {
 
         return new Promise(async (_resolve, _reject) => {
             const [resolve, reject] = race(_resolve, _reject); // only allow the first call
-            setTimeout(() => reject(new Error("Timeout")), timeoutInMillis);
+            setTimeout(() => reject(new Error(`Timeout. Attestation of '${attribute_name}' by ${mid_b64} took more than ${timeoutInMillis}ms.`)), timeoutInMillis);
 
             try {
                 await this.peerService.findPeer(mid_b64, timeoutInMillis - 500);
 
                 this.observer.onAttestation((attestation) => {
                     if (attribute_name === attestation.attribute_name) {
+                        this.log("Received attestation", attestation);
                         resolve(attestation);
                     }
                 });

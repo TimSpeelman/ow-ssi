@@ -1,3 +1,4 @@
+import { Attestation } from "../../api/types";
 import { AttributeWithHash } from './Attribute';
 
 /**
@@ -10,10 +11,20 @@ export interface IVerifierService {
         mid_b64: string,
         credentials: AttributeWithHash[],
         options?: VerifyOptions
-    ): Promise<boolean>
+    ): Promise<MultiVerifyResult>
 }
 
 export interface VerifyOptions {
     maxAgeInSeconds?: number
     timeout?: number
+}
+
+export interface MultiVerifyResult {
+    success: boolean;
+    results: VerifyResult[];
+}
+
+export interface VerifyResult {
+    success: boolean;
+    attestation?: Attestation;
 }

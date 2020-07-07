@@ -45,6 +45,7 @@ export class IPv8Observer {
             readyPoller.hook.on((p) => {
                 if (!done && p.length > 0) {
                     done = true;
+                    readyPoller.stop();
                     clearTimeout(timer);
                     resolve();
                 }

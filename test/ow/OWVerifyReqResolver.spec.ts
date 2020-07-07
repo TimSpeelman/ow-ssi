@@ -9,12 +9,13 @@ describe("OWVerifyReqResolver", () => {
     it("returns a valid response", async function () {
         // The Subject's attestations:
         const repo = mockRepo([
-            { name: "a1", value: "v1", format: "id_metadata", hash: "hash1", metadata: null, signer_mid_b64: "" },
-            { name: "a2", value: "v2", format: "id_metadata", hash: "hash2", metadata: null, signer_mid_b64: "" },
+            { name: "a1", value: "v1", format: "id_metadata", hash: "hash1", metadata: null, signer_mid_b64: "", time: 0, title: {} },
+            { name: "a2", value: "v2", format: "id_metadata", hash: "hash2", metadata: null, signer_mid_b64: "", time: 0, title: {} },
         ]);
 
         // A verification request comes in
         const vReq: OWVerifyRequest = {
+            type: "OWVerifyRequest",
             ref: "abc",
             verifier_id: "",
             attributes: [
@@ -45,6 +46,7 @@ describe("OWVerifyReqResolver", () => {
     it("correctly resolves if possible unambiguously", async function () {
 
         const vReq: OWVerifyRequest = {
+            type: "OWVerifyRequest",
             ref: "abc",
             verifier_id: "",
             attributes: [
@@ -53,8 +55,8 @@ describe("OWVerifyReqResolver", () => {
         };
 
         const repo = mockRepo([
-            { name: "a1", value: "v1", format: "id_metadata", hash: "hash1", metadata: null, signer_mid_b64: "" },
-            { name: "other", value: "v2", format: "id_metadata", hash: "hash2", metadata: null, signer_mid_b64: "" },
+            { name: "a1", value: "v1", format: "id_metadata", hash: "hash1", metadata: null, signer_mid_b64: "", time: 0, title: {} },
+            { name: "other", value: "v2", format: "id_metadata", hash: "hash2", metadata: null, signer_mid_b64: "", time: 0, title: {} },
         ]);
         const resolver = new OWVerifyRequestResolver("myId", repo);
         const result = await resolver.resolveRequest(vReq);
@@ -70,6 +72,7 @@ describe("OWVerifyReqResolver", () => {
 
     it("shows multiple options", async function () {
         const vReq: OWVerifyRequest = {
+            type: "OWVerifyRequest",
             verifier_id: "",
             ref: "abc",
             attributes: [
@@ -78,8 +81,8 @@ describe("OWVerifyReqResolver", () => {
         };
 
         const repo = mockRepo([
-            { name: "a1", value: "v1", format: "id_metadata", hash: "hash1", metadata: null, signer_mid_b64: "" },
-            { name: "a1", value: "v2", format: "id_metadata", hash: "hash2", metadata: null, signer_mid_b64: "" },
+            { name: "a1", value: "v1", format: "id_metadata", hash: "hash1", metadata: null, signer_mid_b64: "", time: 0, title: {} },
+            { name: "a1", value: "v2", format: "id_metadata", hash: "hash2", metadata: null, signer_mid_b64: "", time: 0, title: {} },
         ]);
         const resolver = new OWVerifyRequestResolver("myId", repo);
         const result = await resolver.resolveRequest(vReq);

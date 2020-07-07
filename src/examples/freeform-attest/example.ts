@@ -48,6 +48,7 @@ attestationServer.post("/createAttestOffer", function (req: Request, res: Respon
     const attributes: NameValuePair[] = req.body.attributes;
 
     const offer: OWAttestOffer = {
+        type: "OWAttestOffer",
         attester_id: ipv8Config.mid_b64,
         attributes: attributes.map((a): OWAttestOfferAttr => ({
             format: "id_metadata",

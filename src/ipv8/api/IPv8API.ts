@@ -102,9 +102,10 @@ export class IPv8API {
     }
 
     /** List all created attestations */
-    public listAttestations(): Promise<Attestation[]> {
+    public listAttestations(mid?: string): Promise<Attestation[]> {
+        const query = { type: 'attributes', ...(mid ? { mid } : {}) };
         return this.api
-            .get('/attestation?type=attributes')
+            .get('/attestation?' + queryString(query))
             .then(res =>
                 res.data.map(
                     ([attribute_name, attribute_hash, metadata, signer_mid_b64]: string[]): Attestation => ({

@@ -39,11 +39,18 @@ export interface OWVerifyRespAttr {
 }
 
 export interface OWAttestOffer {
+    type: "OWAttestOffer";
     attester_id: string;
     ref?: string;
     subject_id?: string;
     attributes: OWAttestOfferAttr[];
     expiresAtTimeInMillis: number;
+}
+
+export interface OWAttestResponse {
+    type: "OWAttestResponse";
+    ref: string;
+    answer: boolean;
 }
 
 export interface OWAttestOfferAttr {

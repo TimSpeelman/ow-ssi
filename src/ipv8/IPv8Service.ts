@@ -23,7 +23,7 @@ export class IPv8Service {
     constructor(
         urlToIPv8: string,
         pollIntervalInMillis: number = 500,
-        private timeInMillis: () => number = Date.now
+        protected timeInMillis: () => number = Date.now
     ) {
         this.api = new IPv8API(urlToIPv8);
         this.observer = new IPv8Observer(this.api, pollIntervalInMillis);

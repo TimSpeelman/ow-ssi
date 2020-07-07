@@ -33,6 +33,7 @@ describe("OWVerification end-to-end", () => {
     const verifier = new OWVerifier(bob.verifierService);
 
     const vReq1: OWVerifyRequest = {
+        type: "OWVerifyRequest",
         ref: "abc",
         verifier_id: config.bobMid,
         attributes: [
@@ -60,6 +61,7 @@ describe("OWVerification end-to-end", () => {
         const a2 = attrs.find(a => a.name === "a2");
 
         const vResp1: OWVerifyResponse = {
+            type: "OWVerifyResponse",
             ref: "abc",
             attributes: [
                 { ref: "x", hash: a1.hash, value: a1.value },
@@ -70,14 +72,15 @@ describe("OWVerification end-to-end", () => {
         };
 
         // Alice grants Verification to Bob
-        verifiee.allowVerification(
-            vReq1,
-            Date.now() + 10000)
+        const [_, verification] = await Promise.all([
+            // Alice accepts
+            verifiee.allowVerification(vReq1, Date.now() + 10000),
 
-        // Bob requests verification
-        const verification = await verifier.verify(vReq1, vResp1);
+            // Bob requests verification
+            verifier.verify(vReq1, vResp1)
+        ]);
 
-        expect(verification).to.equal(true);
+        expect(verification.success).to.equal(true);
     })
 
     it("Alice resolves the request properly", async function () {
@@ -114,7 +117,7 @@ describe("OWVerification end-to-end", () => {
         // Bob requests verification
         const verification = await verifier.verify(vReq1, vResponse);
 
-        expect(verification).to.equal(true);
+        expect(verification.success).to.equal(true);
     })
 
 });

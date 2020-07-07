@@ -1,4 +1,5 @@
-import { InboundAttestationRequest } from '../../api/types'
+import { Hook } from "../../../util/Hook"
+import { Attestation, InboundAttestationRequest } from '../../api/types'
 import { Attribute } from './Attribute'
 
 /**
@@ -8,10 +9,17 @@ import { Attribute } from './Attribute'
  * callback otherwise.
  */
 export interface IAttesterService {
+    attestationHook: Hook<AttestationResult>;
     /** Grant the attestation of attributes to a particular peer. */
     stageAttestation(mid_b64: string, attributes: Attribute[], validUntil: number): void
     /** On a request which is not granted, call this callback. */
     onNonStagedRequest(callback: NonStagedRequestCallback): void
+}
+
+export interface AttestationResult {
+    subject_mid: string,
+    attribute: Attribute,
+    attestation: Attestation,
 }
 
 export interface QueuedAttestation {

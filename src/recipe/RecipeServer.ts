@@ -56,6 +56,7 @@ export class RecipeServer {
 
     protected makeOffer(recipe: Recipe, subject_id: string, data: Attribute[]): OWAttestOffer {
         return {
+            type: "OWAttestOffer",
             ref: "FIXME",
             attester_id: this.myId,
             subject_id: subject_id,
